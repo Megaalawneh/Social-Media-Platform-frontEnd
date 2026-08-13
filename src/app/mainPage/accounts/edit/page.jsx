@@ -22,7 +22,6 @@ function EditAccountForm() {
   const [inputEdit, setInputEdit] = useState("");
   const { handleOpen, setInfo } = useContext(alertDialogContext);
 
-  // Ensure hydration completes before rendering dynamic content
   useEffect(() => {
     
     function me() {
@@ -130,9 +129,9 @@ function EditAccountForm() {
                 color: "rgb(165, 154, 154)",
               }}
             >
-              <Typography variant="h5">{inputEdit.userName || ""}</Typography>
+              <Typography variant="h5">{inputEdit?.userName || ""}</Typography>
               <Typography variant="h6">
-                {inputEdit.userFullName || ""}
+                {inputEdit?.userFullName || ""}
               </Typography>
             </div>
           </Stack>
@@ -150,7 +149,7 @@ function EditAccountForm() {
               variant={"outlined"}
               type={"email"}
               required={true}
-              value={inputEdit.userEmail || ""}
+              value={inputEdit?.userEmail || ""}
               onChange={handleFieldChange("userEmail")}
             />
             <CustomTextFields
@@ -158,7 +157,7 @@ function EditAccountForm() {
               label={"Password"}
               type={"password"}
               required={true}
-              value={inputEdit.userPassword || ""}
+              value={inputEdit?.userPassword || ""}
               onChange={handleFieldChange("userPassword")}
             />
             <CustomTextFields
@@ -166,7 +165,7 @@ function EditAccountForm() {
               label={"Full Name"}
               type={"text"}
               required={true}
-              value={inputEdit.userFullName || ""}
+              value={inputEdit?.userFullName || ""}
               onChange={handleFieldChange("userFullName")}
             />
             <CustomTextFields
@@ -174,7 +173,7 @@ function EditAccountForm() {
               label={"Username"}
               type={"text"}
               required={true}
-              value={inputEdit.userName || ""}
+              value={inputEdit?.userName || ""}
               onChange={handleFieldChange("userName")}
             />
             <Button
