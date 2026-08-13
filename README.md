@@ -1,8 +1,3 @@
-diff --git a/D:\2026\Downloads\Compressed\pathProject\README.md b/D:\2026\Downloads\Compressed\pathProject\README.md
-new file mode 100644
---- /dev/null
-+++ b/D:\2026\Downloads\Compressed\pathProject\README.md
-@@ -0,0 +1,104 @@
 +# PathWebSite
 +
 +PathWebSite is a front-end social-media prototype built with Next.js, React, and Material UI. It provides local profile management, image posts, profile search, a demo direct-message interface, and a weather card.
