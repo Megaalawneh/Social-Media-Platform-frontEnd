@@ -35,18 +35,7 @@ function PostItem({ p, state, dispatch, idUser, user, setInfo, handleOpen }) {
 
   const author = state.users?.find((u) => u.userId === p.idUser);
   const authorName = author ? author.userName : "Unknown User";
-  const [isMounted, setIsMounted] = useState(false);
 
-  useEffect(() => {
-    function IsMounted() {
-      setIsMounted(true);
-    }
-    IsMounted();
-  }, []);
-
-  if (!isMounted) {
-    return null;
-  }
   return (
     <div className="postContainer">
       <Card
@@ -226,7 +215,7 @@ function PostItem({ p, state, dispatch, idUser, user, setInfo, handleOpen }) {
             display: "block",
             color: "#8f9197",
             marginTop: "4px",
-            padding: "0 16px",
+            padding: "8px 16px 16px",
           }}
         >
           <Typography
@@ -241,6 +230,8 @@ function PostItem({ p, state, dispatch, idUser, user, setInfo, handleOpen }) {
               return u.userId === p.idUser ? u.userName : "";
             })}
           </Typography>
+          {" "}
+          {p.postCaption}
         </Typography>
       </Card>
     </div>
@@ -252,6 +243,19 @@ export default function Post() {
   const { idUser } = state.posts?.[0] || {};
   const user = state.users?.[0] || {};
   const { setInfo, handleOpen } = useContext(alertDialogContext);
+
+  const [isMounted, setIsMounted] = useState(false);
+
+  useEffect(() => {
+    function IsMounted() {
+      setIsMounted(true);
+    }
+    IsMounted();
+  }, []);
+
+  if (!isMounted) {
+    return null;
+  }
 
   return (
     <>
