@@ -1,0 +1,52 @@
+body{
+  background: rgb(35, 34, 34) !important;
+}
+.loginPageContainer {
+  display: flex;
+  min-height: 100vh;
+  padding: 0px !important;
+}
+
+.LoginCard {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  color: white !important;
+  min-height: auto;
+}
+.loginPageCardInfo {
+  display: flex;
+  flex-direction: column;
+  width: 80%;
+}
+.passwordbtn {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  margin-left: 9px !important;
+}
+.TextFields {
+  margin-top: 10px !important;
+  margin-bottom: 30px !important;
+}
+
+.btn {
+  border: 1px solid gray !important;
+  border-radius: 22px !important;
+  margin: 10px !important;
+  padding: 9px !important;
+  color: white !important;
+}
+.btnCreate {
+  border: 1px solid gray !important;
+  border-radius: 22px !important;
+  margin: 10px !important;
+  padding: 9px !important;
+}
+.btnForgottenPassword {
+  margin: 10px !important;
+  padding: 9px !important;
+  color: white !important;
+}
+

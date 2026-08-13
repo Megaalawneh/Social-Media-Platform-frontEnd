@@ -1,0 +1,192 @@
+.mainPageContainer {
+  display: flex;
+  min-height: 100vh;
+  background: rgb(35, 34, 34);
+  color: white;
+  padding: 0 !important;
+  align-items: start;
+}
+.pageMain {
+  flex: 1;
+  min-width: 0;
+}
+
+.pageAside {
+  width: 160px;
+  flex-shrink: 0;
+  position: sticky;
+  top: 24px;
+}
+.postContainer {
+  display: flex;
+  justify-content: center;
+  width: 100%;
+  margin: 20px 0 34px;
+  padding: 0 12px;
+  box-sizing: border-box;
+}
+.searchContainer {
+  display: flex;
+  background: rgb(35, 34, 34);
+  align-items: center;
+  height: 100vh;
+  flex-direction: column;
+  margin-right: 250px;
+  
+}
+.mui-1nhnmaj-MuiInputBase-root-MuiOutlinedInput-root {
+  background-color: rgb(68, 66, 66) !important;
+  width: 400px;
+}
+
+.mainPageContainer > aside:first-child {
+  width: 200px;
+}
+
+.mainPageContainer > main {
+  flex: 1;
+}
+
+.mainPageContainer > aside:last-child {
+  width: 450px;
+}
+.asideButton {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+.expandButtonIcon {
+  color: white !important;
+}
+.expandButton span {
+  max-width: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  transition: 0.3s;
+}
+
+.expandButton:hover span {
+  max-width: 100px;
+  margin-left: 8px;
+}
+.HomeButton {
+  margin-bottom: 30px;
+}
+.weatherContainer {
+  box-shadow: 0 7px 7px rgba(75, 108, 135, 0.25);
+  border-radius: 15px;
+  padding: 15px;
+  margin: 30px;
+}
+.editContainer {
+  display: flex;
+  min-height: 100vh;
+  margin-top: 30px;
+  margin-right: 170px;
+  justify-content: center;
+  color: white;
+}
+.messageContainer {
+  display: flex;
+  flex-direction: row;
+  height: 100vh;
+  gap: 18px;
+  padding: 18px;
+  background: #121214;
+}
+.usersSide {
+  width: 320px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  background: #1f2024;
+  border-radius: 20px;
+  border: 1px solid #2d2f35;
+}
+.contactTop {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px;
+}
+.contactSearch {
+  padding: 0 20px 16px;
+}
+.contactSearch .MuiOutlinedInput-root {
+  background-color: #27292f;
+  color: white;
+}
+.contactList {
+  flex: 1;
+  overflow-y: auto;
+  padding-bottom: 12px;
+  background-color:#444549 !important;
+}
+.usersMessages {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  background: #18191f;
+  border-radius: 20px;
+  overflow: hidden;
+  border: 1px solid #2d2f35;
+}
+.messageHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px;
+}
+.messageContent {
+  flex: 1;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  overflow-y: auto;
+}
+.messageComposer {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 16px;
+  background: #101114;
+  border-top: 1px solid #2d2f35;
+  position: relative;
+}
+.composerInput .MuiOutlinedInput-root {
+  background-color: #27292f;
+  color: white;
+}
+.messageBubble {
+  max-width: 65%;
+  border-radius: 18px;
+  padding: 14px 16px;
+  background: #262830;
+  color: white;
+  display: inline-flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.messageBubble.incoming {
+  align-self: flex-start;
+  background: #27292f;
+}
+.messageBubble.outgoing {
+  align-self: flex-end;
+  background: #3b82f6;
+}
+.timestamp {
+  color: #b0b3b8;
+  font-size: 0.75rem;
+}
+.emojiPicker {
+  position: absolute;
+  right: 24px;
+  bottom: 76px;
+  z-index: 10;
+}
+.Divider {
+  color: rgb(35, 34, 34) !important;
+  background-color: rgb(68, 66, 66) !important;
+}
