@@ -219,28 +219,28 @@ function PostItem({ p, state, dispatch, idUser, user, setInfo, handleOpen }) {
         </CardActions>
         <Divider />
 
-        {/* Outer text container must be a div block to allow inline child elements */}
         <Typography
           component="div"
-          variant="body2"
+          variant="caption"
           sx={{
             display: "block",
             color: "#8f9197",
-            padding: "12px 16px 16px",
+            marginTop: "4px",
+            padding: "0 16px",
           }}
         >
           <Typography
             component="span"
-            variant="body2"
+            variant="caption"
             sx={{
               fontWeight: 600,
               color: "#fff",
-              marginRight: "6px",
             }}
           >
-            {authorName}
+            {state.users.map((u) => {
+              return u.userId === p.idUser ? u.userName : "";
+            })}
           </Typography>
-          {p.caption || p.data}
         </Typography>
       </Card>
     </div>
