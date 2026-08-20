@@ -251,13 +251,12 @@ function DirectPageContent() {
 }
 export default function DirectPage() {
   return (
-
-      <CreateProfileProvider>
-          <AlertDialogProvider>
-            <PageLayout>
-           <DirectPageContent />
-            </PageLayout>
-          </AlertDialogProvider>
-        </CreateProfileProvider>
+    <CreateProfileProvider>
+      <AlertDialogProvider>
+        <PageLayout>
+          <DirectPageContent />
+        </PageLayout>
+      </AlertDialogProvider>
+    </CreateProfileProvider>
   );
 }

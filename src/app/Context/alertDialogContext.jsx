@@ -9,7 +9,8 @@ export const AlertDialogProvider = ({ children }) => {
     alertName: "",
     colorBtn:"white !important",
     type:"",
-    payload:{}
+    payload:{},
+    functionHandle:""
 
   });
   const [open, setOpen] = useState(false);
@@ -22,7 +23,7 @@ export const AlertDialogProvider = ({ children }) => {
  
 
   return (
-    <alertDialogContext.Provider value={{ info,open,handleClose, handleOpen, setInfo}}>
+    <alertDialogContext.Provider value={{ info,open,handleClose, handleOpen, setInfo ,}}>
       <AlertDialog />
       {children}
     </alertDialogContext.Provider>

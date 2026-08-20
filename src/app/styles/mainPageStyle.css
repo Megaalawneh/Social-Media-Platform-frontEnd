@@ -190,3 +190,6 @@
   color: rgb(35, 34, 34) !important;
   background-color: rgb(68, 66, 66) !important;
 }
+.mui-1elmaeo-MuiPaper-root-MuiCard-root{
+    margin-bottom:none;
+  }

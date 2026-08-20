@@ -13,7 +13,8 @@ import IconButton from "@mui/material/IconButton";
 import CloseIcon from "@mui/icons-material/Close";
 import PermMediaIcon from "@mui/icons-material/PermMedia";
 import { styled } from "@mui/material/styles";
-import {CreateProfile} from "../Context/CreateProfileContext";
+import { CreateProfile } from "../Context/CreateProfileContext";
+
 const VisuallyHiddenInput = styled("input")({
   clip: "rect(0 0 0 0)",
   clipPath: "inset(50%)",
@@ -26,36 +27,68 @@ const VisuallyHiddenInput = styled("input")({
   width: 1,
 });
 
-function SimpleDialog(props) {
-  const { onClose, selectedValue, open } = props;
+function SimpleDialog({ onClose, selectedValue, open }) {
   const [caption, setCaption] = useState("");
   const [previewUrl, setPreviewUrl] = useState("");
-  const { state,dispatch } = useContext(CreateProfile);
-  const user = state.users[0] || {};
+  const [mediaType, setMediaType] = useState("");
+  const [uploadError, setUploadError] = useState("");
+  const { state, dispatch } = useContext(CreateProfile);
+  const user = state.users?.[0] || {};
+
+  const discardMedia = () => {
+    if (previewUrl) URL.revokeObjectURL(previewUrl);
+
+    setPreviewUrl("");
+    setMediaType("");
+    setUploadError("");
+  };
 
   const handleClose = () => {
+    discardMedia();
+    setCaption("");
     onClose(selectedValue);
   };
 
   const handleFileChange = (event) => {
     const file = event.target.files?.[0];
+    event.target.value = "";
+
     if (!file) return;
 
-    const objectUrl = URL.createObjectURL(file);
-    setPreviewUrl(objectUrl);
+    if (!file.type.startsWith("image/") && !file.type.startsWith("video/")) {
+      setUploadError("Please choose an image or video file.");
+      return;
+    }
+
+    if (previewUrl) URL.revokeObjectURL(previewUrl);
+
+    setPreviewUrl(URL.createObjectURL(file));
+    setMediaType(file.type.startsWith("video/") ? "video" : "image");
+    setUploadError("");
   };
 
   const handleShare = () => {
-    
-    dispatch({type:"post",payload:{previewUrl,caption,user}})
-    console.log("Posting caption:", caption);
-    console.log("Selected file:", previewUrl);
-    handleClose();
-  
+    if (!previewUrl || !user?.userId) return;
+
+    dispatch({
+      type: "post",
+      payload: { previewUrl, caption, user, mediaType },
+    });
+
+    setPreviewUrl("");
+    setMediaType("");
+    setCaption("");
+    onClose(selectedValue);
   };
 
   return (
-    <Dialog onClose={handleClose} open={open} maxWidth="sm" fullWidth>
+    <Dialog
+      onClose={handleClose}
+      open={open}
+      maxWidth="sm"
+      fullWidth
+      disableScrollLock
+    >
       <DialogTitle
         sx={{
           display: "flex",
@@ -86,41 +119,64 @@ function SimpleDialog(props) {
             }}
           >
             <PermMediaIcon sx={{ fontSize: 52, color: "text.secondary" }} />
-            <Typography variant="h6">Drag photos and videos here</Typography>
+            <Typography variant="h6">Choose a photo or video</Typography>
 
             <Button
               component="label"
               variant="contained"
               startIcon={<PermMediaIcon />}
             >
-              Upload files
+              Upload file
               <VisuallyHiddenInput
                 type="file"
+                accept="image/*,video/*"
                 onChange={handleFileChange}
-                multiple
               />
             </Button>
+
+            {uploadError && (
+              <Typography color="error" variant="body2">
+                {uploadError}
+              </Typography>
+            )}
           </Box>
         ) : (
           <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
-            <Box
-              component="img"
-              src={previewUrl}
-              alt="preview"
-              sx={{
-                width: "100%",
-                maxHeight: 420,
-                objectFit: "cover",
-                borderRadius: 2,
-              }}
-            />
+            {mediaType === "video" ? (
+              <Box
+                component="video"
+                src={previewUrl}
+                controls
+                playsInline
+                preload="metadata"
+                sx={{
+                  width: "100%",
+                  maxHeight: 420,
+                  objectFit: "cover",
+                  borderRadius: 2,
+                }}
+              />
+            ) : (
+              <Box
+                component="img"
+                src={previewUrl}
+                alt="Selected upload preview"
+                sx={{
+                  width: "100%",
+                  maxHeight: 420,
+                  objectFit: "cover",
+                  borderRadius: 2,
+                }}
+              />
+            )}
+
             <TextField
               fullWidth
               multiline
               minRows={3}
               label="Write a caption..."
               value={caption}
-              onChange={(e) => setCaption(e.target.value)}
+              onChange={(event) => setCaption(event.target.value)}
             />
           </Box>
         )}
@@ -128,8 +184,8 @@ function SimpleDialog(props) {
 
       <DialogActions sx={{ px: 3, pb: 2, justifyContent: "space-between" }}>
         {previewUrl ? (
-          <Button color="inherit" onClick={() => setPreviewUrl("")}>
-            Cancel
+          <Button color="inherit" onClick={discardMedia}>
+            Choose another file
           </Button>
         ) : (
           <Box />
@@ -139,7 +195,7 @@ function SimpleDialog(props) {
           variant="contained"
           color="primary"
           onClick={handleShare}
-          disabled={!previewUrl}
+          disabled={!previewUrl || !user?.userId}
         >
           Share
         </Button>
@@ -151,7 +207,7 @@ function SimpleDialog(props) {
 SimpleDialog.propTypes = {
   onClose: PropTypes.func.isRequired,
   open: PropTypes.bool.isRequired,
-  selectedValue: PropTypes.string.isRequired,
+  selectedValue: PropTypes.string,
 };
 
 export default function SimpleDialogDemo({
@@ -160,11 +216,10 @@ export default function SimpleDialogDemo({
   onClose,
 }) {
   const [internalOpen, setInternalOpen] = useState(Boolean(me));
-
   const open = controlledOpen ?? internalOpen;
 
   const handleClose = () => {
-    if (onClose) onClose();
+    onClose?.();
     setInternalOpen(false);
   };
 

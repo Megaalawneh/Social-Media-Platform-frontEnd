@@ -1,0 +1,67 @@
+.accountContainer {
+  display: flex;
+  background: rgb(35, 34, 34);
+  height: 100vh;
+  min-height: 100vh;
+  max-height: 100vh;
+  width: 100%;
+  color: white;
+  justify-content: start;
+  overflow: auto;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+.asideButton {
+  width: 150px !important;
+}
+.profile {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  min-height: 100vh;
+}
+.profileAvatar {
+  display: flex;
+  width: 100%;
+  height: 35vh;
+  margin-left: 150px;
+  margin-top: 70px;
+  flex-shrink: 0;
+}
+.profileInfo {
+  display: flex;
+  flex-direction: column;
+  margin-left: 30px;
+}
+.profileFollow {
+  display: flex;
+}
+.profileBio {
+  display: flex;
+  margin-top: 10px;
+}
+.profileBtn {
+  display: flex;
+  height: 10vh;
+  margin-left: 150px;
+  flex-shrink: 0;
+}
+.profilePosts {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 2px;
+  width: 100%;
+}
+
+.postPic {
+  width: 100%;
+}
+
+.postPic img {
+  width: 100%;
+  height: 380px;
+  object-fit: cover;
+}
+.MuiContainer-root {
+  padding: 0 !important;
+}

@@ -5,6 +5,7 @@ import Weather from "../components/weatherApi";
 import PageLayout from "../components/PageLayout";
 import { CreateProfileProvider } from "../Context/CreateProfileContext";
 import { AlertDialogProvider } from "../Context/alertDialogContext";
+import { CommentDialogProvider } from "../Context/commentDialogContext";
 export default function page() {
   return (
     <>
@@ -13,7 +14,9 @@ export default function page() {
           <Container maxWidth="xl" className="mainPageContainer">
             <main>
               <AlertDialogProvider>
-                <Post />
+                <CommentDialogProvider>
+                  <Post />
+                </CommentDialogProvider>
               </AlertDialogProvider>
             </main>
             <aside>

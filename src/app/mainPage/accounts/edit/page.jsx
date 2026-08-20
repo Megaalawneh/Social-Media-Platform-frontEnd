@@ -21,9 +21,9 @@ function EditAccountForm() {
   const { userProfilePic } = state.users?.[0] || {};
   const [inputEdit, setInputEdit] = useState("");
   const { handleOpen, setInfo } = useContext(alertDialogContext);
+  const [value, setValue] = useState(true);
 
   useEffect(() => {
-    
     function me() {
       setIsHydrated(true);
       setInputEdit(state.users[0]);
@@ -41,6 +41,29 @@ function EditAccountForm() {
       return updatedValue;
     });
   };
+  useEffect(() => {
+    function validinputData() {
+      const validFullName = /^[A-Za-z]/.test(inputEdit?.userFullName);
+      const validUserName = /^[A-Za-z][A-Za-z0-9]*$/.test(inputEdit?.userName);
+      const validUserPassword =
+        /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$%]).{8,}$/.test(
+          inputEdit.userPassword,
+        );
+      if (
+        inputEdit?.userName?.length >= 6 &&
+        inputEdit?.userBio?.length <= 100 &&
+        inputEdit?.userFullName !== "" &&
+        validFullName &&
+        validUserName &&
+        validUserPassword
+      ) {
+        setValue(false);
+      } else {
+        setValue(true);
+      }
+    }
+    validinputData();
+  }, [inputEdit]);
 
   const handleSave = () => {
     if (!inputEdit?.userId) return;
@@ -79,7 +102,7 @@ function EditAccountForm() {
 
   return (
     <PageLayout>
-      <div className="editContainer" >
+      <div className="editContainer">
         <Box sx={{ width: "100%", maxWidth: 400 }}>
           <Stack
             direction="row"
@@ -159,6 +182,9 @@ function EditAccountForm() {
               required={true}
               value={inputEdit?.userPassword || ""}
               onChange={handleFieldChange("userPassword")}
+              placeholder={
+                "password must be 8 characters and 1 uppercase letter and 1 lowercase letter and @ $ %"
+              }
             />
             <CustomTextFields
               id={"outlined-basic"}
@@ -167,22 +193,32 @@ function EditAccountForm() {
               required={true}
               value={inputEdit?.userFullName || ""}
               onChange={handleFieldChange("userFullName")}
+              placeholder={"required"}
             />
             <CustomTextFields
               id={"outlined-basic"}
               label={"Username"}
+              placeholder={"Username must be 8 character"}
               type={"text"}
               required={true}
               value={inputEdit?.userName || ""}
               onChange={handleFieldChange("userName")}
             />
+            <CustomTextFields
+              id={"outlined-basic"}
+              label={"Bio"}
+              type={"text"}
+               placeholder={"100 character maximum"}
+              required={true}
+              value={inputEdit?.userBio || ""}
+              onChange={handleFieldChange("userBio")}
+            />
             <Button
-            
               variant="contained"
               endIcon={<SaveAsIcon />}
               sx={{ marginTop: "20px" }}
               onClick={handleSave}
-              
+              disabled={value}
             >
               save changes
             </Button>
@@ -196,7 +232,7 @@ function EditAccountForm() {
 export default function Page() {
   return (
     <CreateProfileProvider>
-      <AlertDialogProvider >
+      <AlertDialogProvider>
         <EditAccountForm />
       </AlertDialogProvider>
     </CreateProfileProvider>

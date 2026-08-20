@@ -21,21 +21,21 @@ const BootstrapDialog = styled(Dialog)(({ theme }) => ({
     backgroundColor: "rgb(35, 34, 34)",
     color: "white",
     width: "400px !important",
-     borderRadius:"10px"
-   
+    borderRadius: "10px",
   },
-  
+
   "& .mui-ujudvl-MuiTypography-root-MuiDialogContentText-root": {
     color: "white",
   },
   "& .MuiButtonBase-root": {
     color: "white",
-    fontWeight: "600"
+    fontWeight: "600",
   },
 }));
 
 export default function AlertDialog() {
-  const { info, open, handleClose } = useContext(alertDialogContext);
+  const { info, open, handleClose } =
+    useContext(alertDialogContext);
   const { dispatch } = useContext(CreateProfile);
   const handleDelete = () => {
     dispatch({ type: info.type, payload: info.payload });
@@ -60,10 +60,14 @@ export default function AlertDialog() {
           <Button onClick={handleClose} autoFocus>
             Cancel
           </Button>
-          <Button sx={{color:info.colorBtn}}
+          <Button
+            sx={{ color: info.colorBtn }}
             onClick={() => {
               handleClose();
               handleDelete();
+             if( info.functionHandle){
+               info.functionHandle();
+             }
             }}
           >
             {info.alertName || ""}

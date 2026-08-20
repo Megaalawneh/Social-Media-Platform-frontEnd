@@ -5,10 +5,8 @@ export const CreateProfile = createContext(null);
 const initialState = {
   users: [],
   posts: [],
-  likes: [],
-  comments: [],
   messages: [],
-  Search:[],
+  Search: [],
 };
 export const CreateProfileProvider = ({ children }) => {
   const [inputData, setInputData] = useState({
@@ -20,15 +18,16 @@ export const CreateProfileProvider = ({ children }) => {
     userBirthYear: "",
     userFullName: "",
     userProfilePic: "",
+    userBio:"",
   });
- 
+
   const getInitialTasks = () => {
     try {
       const storage = localStorage.getItem("AppState");
       if (!storage) {
         return initialState;
       }
-    
+
       return JSON.parse(storage);
     } catch {
       return [];
@@ -40,7 +39,7 @@ export const CreateProfileProvider = ({ children }) => {
     initialState,
     getInitialTasks,
   );
-   useEffect(() => {
+  useEffect(() => {
     localStorage.setItem("AppState", JSON.stringify(state));
   }, [state]);
 
