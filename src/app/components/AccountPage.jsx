@@ -10,9 +10,9 @@ import { useParams } from "next/navigation";
 export default function AccountPage() {
   const avatarSrc = undefined;
   const { state } = useContext(CreateProfile);
-  const User = state.users?.[0] || {};
   const [isMounted, setIsMounted] = useState(false);
   const params = useParams();
+  const User = state.users?.find(user => user.userName === params.userId)
   const postCount = useMemo(
     () => state.posts?.filter((p) => p.idUser === User.userId).length,
     [User.userId, state.posts],

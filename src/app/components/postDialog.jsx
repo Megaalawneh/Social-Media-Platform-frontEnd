@@ -32,8 +32,8 @@ function SimpleDialog({ onClose, selectedValue, open }) {
   const [previewUrl, setPreviewUrl] = useState("");
   const [mediaType, setMediaType] = useState("");
   const [uploadError, setUploadError] = useState("");
-  const { state, dispatch } = useContext(CreateProfile);
-  const user = state.users?.[0] || {};
+  const { dispatch ,User} = useContext(CreateProfile);
+
 
   const discardMedia = () => {
     if (previewUrl) URL.revokeObjectURL(previewUrl);
@@ -68,11 +68,11 @@ function SimpleDialog({ onClose, selectedValue, open }) {
   };
 
   const handleShare = () => {
-    if (!previewUrl || !user?.userId) return;
+    if (!previewUrl || !User?.userId) return;
 
     dispatch({
       type: "post",
-      payload: { previewUrl, caption, user, mediaType },
+      payload: { previewUrl, caption, User, mediaType },
     });
 
     setPreviewUrl("");
@@ -195,7 +195,7 @@ function SimpleDialog({ onClose, selectedValue, open }) {
           variant="contained"
           color="primary"
           onClick={handleShare}
-          disabled={!previewUrl || !user?.userId}
+          disabled={!previewUrl || !User?.userId}
         >
           Share
         </Button>

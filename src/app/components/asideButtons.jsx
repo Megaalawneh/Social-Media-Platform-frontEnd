@@ -12,8 +12,8 @@ import { CreateProfile } from "../Context/CreateProfileContext";
 import { useContext ,useEffect} from "react";
 export default function Aside() {
   const [postDialogOpen, setPostDialogOpen] = useState(false);
-   const { state } = useContext(CreateProfile);
-    const user = state?.users?.[0] || {};
+   const {User } = useContext(CreateProfile);
+    
     const [isMounted, setIsMounted] = useState(false);
 
 
@@ -55,14 +55,14 @@ export default function Aside() {
           onClose={() => setPostDialogOpen(false)}
         />
       )}
-     {isMounted && user?.userProfilePic? <ExpandButton
+     {isMounted && User?.userProfilePic? <ExpandButton
         name={"Profile"}
-        authorPic={user?.userProfilePic}
-        LinkTogo={`/mainPage/${user?.userName}`}
+        authorPic={User?.userProfilePic}
+        LinkTogo={`/mainPage/${User?.userName}`}
       />: <ExpandButton
         name={"Profile"}
         icon={<PersonIcon/>}
-        LinkTogo={`/mainPage/${user?.userName}`}
+        LinkTogo={`/mainPage/${User?.userName}`}
       />}
     </aside>
   );

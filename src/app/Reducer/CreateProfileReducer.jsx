@@ -40,13 +40,13 @@ export default function CreateProfileReducer(state, action) {
     }
 
     case "post": {
-      const { previewUrl, caption, user, mediaType } = action.payload || {};
-
-      if (!previewUrl || !user?.userId) return state;
+      const { previewUrl, caption, User, mediaType } = action.payload || {};
+      
+      if (!previewUrl || !User?.userId) return state;
 
       const newPost = {
         idPost: uuidv4(),
-        idUser: user.userId,
+        idUser: User.userId,
         postCaption: caption,
         data: moment().format("LLL"),
         media: previewUrl,
@@ -99,6 +99,7 @@ export default function CreateProfileReducer(state, action) {
 
     case "deletePost": {
       const { idUser, idPost } = action.payload || {};
+
       return {
         ...state,
         posts: state.posts.filter(

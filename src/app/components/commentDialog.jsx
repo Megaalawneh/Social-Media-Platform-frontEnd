@@ -61,8 +61,8 @@ const BootstrapDialog = styled(Dialog)(({ theme }) => ({
 
 export default function CommentDialog() {
   const { open, handleClose, postId } = useContext(CommentDialogContext);
-  const { state, dispatch } = useContext(CreateProfile);
-  const user = state.users?.[0] || {};
+  const { state, dispatch, User } = useContext(CreateProfile);
+ 
   const post = useMemo(
     () => state.posts?.find((p) => p.idPost === postId),
     [postId, state.posts],
@@ -83,8 +83,8 @@ export default function CommentDialog() {
   const authorProfilePic = author ? author.userProfilePic : undefined;
 
   const like = useMemo(() => {
-    return post?.likedCount?.some((like) => like.userId === user.userId);
-  }, [post?.likedCount, user.userId]);
+    return post?.likedCount?.some((like) => like.userId === User.userId);
+  }, [post?.likedCount, User.userId]);
 
   function handlelPost(event, idPost, userId) {
     dispatch({ type: event, payload: { userId, idPost } });
@@ -137,13 +137,13 @@ export default function CommentDialog() {
           const authorProfilePic = author ? author.userProfilePic : undefined;
           let LIMIT = 30;
           const isExpanded = expandedCommentId === c?.commentId;
-          const isLongText = c?.textComment.length > LIMIT;
+          const isLongText = c?.textComment?.length > LIMIT;
           const displayedText = () => {
             if (!isLongText || isExpanded) return c?.textComment;
             return c?.textComment.slice(0, LIMIT) + "...";
           };
           const like = c.likedCount?.some(
-            (like) => like.userId === user.userId,
+            (like) => like.userId === User.userId,
           );
           const handleDeleteComment = (idPost, userId, commentId) => {
             if (!c?.userId) return;
@@ -249,7 +249,7 @@ export default function CommentDialog() {
                     handlelLikeComment(
                       "commentLiked",
                       post?.idPost,
-                      user.userId,
+                      User.userId,
                       c.commentId,
                     );
                   }}
@@ -287,7 +287,7 @@ export default function CommentDialog() {
                   }}
                   endIcon={<DehazeRoundedIcon />}
                   onClick={() => {
-                    handleDeleteComment(post?.idPost ,user.userId, c.commentId);
+                    handleDeleteComment(post?.idPost ,User.userId, c.commentId);
                   }}
                 />
               </Typography>
@@ -525,7 +525,7 @@ export default function CommentDialog() {
                       alertName: "Delete",
                       type: "deletePost",
                       colorBtn: "red !important",
-                      payload: { idPost: post.idPost, idUser:user.userId},
+                      payload: { idPost: post.idPost, idUser:User.userId},
                       functionHandle:handleClose
                     });
                     handleOpen();
@@ -570,7 +570,7 @@ export default function CommentDialog() {
               <IconButton
                 aria-label="add to favorites"
                 onClick={() => {
-                  handlelPost("postLiked", post?.idPost, user.userId);
+                  handlelPost("postLiked", post?.idPost, User.userId);
                 }}
               >
                 <FavoriteIcon
@@ -596,7 +596,7 @@ export default function CommentDialog() {
                 aria-label="share"
                 sx={{ color: "#9ca3af", borderRadius: "999px" }}
                 onClick={() => {
-                  handlelPost("postShare", post.idPost, user.userId);
+                  handlelPost("postShare", post.idPost, User.userId);
                 }}
               >
                 <ShareIcon />
@@ -674,7 +674,7 @@ export default function CommentDialog() {
                             handleladdComment(
                               "addComment",
                               post?.idPost,
-                              user.userId,
+                              User.userId,
                               messageText,
                             );
                             setMessageText("")

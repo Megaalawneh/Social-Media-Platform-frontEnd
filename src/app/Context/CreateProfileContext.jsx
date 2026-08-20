@@ -42,10 +42,10 @@ export const CreateProfileProvider = ({ children }) => {
   useEffect(() => {
     localStorage.setItem("AppState", JSON.stringify(state));
   }, [state]);
-
+  const User = state.users?.[2] || {};
   return (
     <CreateProfile.Provider
-      value={{ state, dispatch, inputData, setInputData }}
+      value={{ state, dispatch, inputData, setInputData,User }}
     >
       {children}
     </CreateProfile.Provider>

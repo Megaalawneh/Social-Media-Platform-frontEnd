@@ -17,8 +17,8 @@ import { alertDialogContext } from "../../../Context/alertDialogContext";
 function EditAccountForm() {
   const [isHydrated, setIsHydrated] = useState(false);
   const [avatarSrc, setAvatarSrc] = useState(undefined);
-  const { state } = useContext(CreateProfile);
-  const { userProfilePic } = state.users?.[0] || {};
+  const { state ,User} = useContext(CreateProfile);
+  const { userProfilePic } = User;
   const [inputEdit, setInputEdit] = useState("");
   const { handleOpen, setInfo } = useContext(alertDialogContext);
   const [value, setValue] = useState(true);
@@ -26,10 +26,10 @@ function EditAccountForm() {
   useEffect(() => {
     function me() {
       setIsHydrated(true);
-      setInputEdit(state.users[0]);
+      setInputEdit(User);
     }
     me();
-  }, [state]);
+  }, [state,User]);
 
   const handleFieldChange = (field) => (event) => {
     const value = event.target.value;

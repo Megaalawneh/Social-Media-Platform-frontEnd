@@ -386,9 +386,9 @@ function PostItem({ p, state, dispatch, idUser, user, setInfo, handleOpen ,handl
 }
 
 export default function Post() {
-  const { state, dispatch } = useContext(CreateProfile);
-  const { idUser } = state.posts?.[0] || {};
-  const user = state.users?.[0] || {};
+  const { state, dispatch,User } = useContext(CreateProfile);
+  
+  
   const { setInfo, handleOpen } = useContext(alertDialogContext);
  const {handleClickOpen,setPostId} =useContext(CommentDialogContext)
   const [isMounted, setIsMounted] = useState(false);
@@ -413,8 +413,8 @@ export default function Post() {
             p={p}
             state={state}
             dispatch={dispatch}
-            idUser={idUser}
-            user={user}
+            idUser={User.userId}
+            user={User}
             setInfo={setInfo}
             handleOpen={handleOpen}
             handleClickOpen={handleClickOpen}
