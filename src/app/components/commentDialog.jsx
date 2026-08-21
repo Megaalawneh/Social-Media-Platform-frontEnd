@@ -132,6 +132,7 @@ export default function CommentDialog() {
     return state.posts?.map((p) =>
       p?.idPost === post?.idPost ? 
         p?.CommentCount.map((c) => {
+         
           const author = state.users?.find((u) => u?.userId === c?.userId);
           const authorName = author ? author.userName : "Unknown User";
           const authorProfilePic = author ? author.userProfilePic : undefined;
@@ -206,7 +207,7 @@ export default function CommentDialog() {
                   >
                     <Typography variant="caption">
                       {state.users?.map((u) => {
-                        return u.userId === post?.idUser ? u.userName : "";
+                        return u.userId === c?.userId ? u.userName : "";
                       })}
                     </Typography>
 

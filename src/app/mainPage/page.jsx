@@ -11,18 +11,20 @@ export default function page() {
     <>
       <CreateProfileProvider>
         <PageLayout>
-          <Container maxWidth="xl" className="mainPageContainer">
-            <main>
-              <AlertDialogProvider>
-                <CommentDialogProvider>
-                  <Post />
-                </CommentDialogProvider>
-              </AlertDialogProvider>
-            </main>
-            <aside>
-              <Weather />
-            </aside>
-          </Container>
+     
+            <Container maxWidth="xl" className="mainPageContainer">
+              <main>
+                <AlertDialogProvider>
+                  <CommentDialogProvider>
+                    <Post />
+                  </CommentDialogProvider>
+                </AlertDialogProvider>
+              </main>
+              <aside>
+                <Weather />
+              </aside>
+            </Container>
+          
         </PageLayout>
       </CreateProfileProvider>
     </>

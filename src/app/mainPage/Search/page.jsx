@@ -1,5 +1,5 @@
 "use client";
-import React, { useContext, useState } from "react";
+import React, { useContext, useState,useEffect } from "react";
 import TextField from "@mui/material/TextField";
 import InputAdornment from "@mui/material/InputAdornment";
 import SearchIcon from "@mui/icons-material/Search";
@@ -7,7 +7,7 @@ import { Avatar, Box, Stack, Typography } from "@mui/material";
 import "../../styles/mainPageStyle.css";
 import PageLayout from "../../components/PageLayout";
 import {
-  CreateProfileProvider,
+
   CreateProfile,
 } from "../../Context/CreateProfileContext";
 import { AlertDialogProvider } from "../../Context/alertDialogContext";
@@ -23,7 +23,18 @@ function SearchContent() {
       payload: { inputData: value },
     });
   }
+  const [isMounted, setIsMounted] = useState(false);
 
+  useEffect(() => {
+    function moun() {
+      setIsMounted(true);
+    }
+    moun();
+  }, []);
+
+  if (!isMounted) {
+    return null;
+  }
   return (
     <div className="searchContainer">
       <TextField
@@ -44,9 +55,8 @@ function SearchContent() {
 
       <Box sx={{ width: "100%", maxWidth: 400 }}>
         {results ? (
-          
           results.map((user) => (
-            <Link key={user.userId} href={`/mainPage/${user.userName}`} >
+            <Link key={user.userId} href={`/mainPage/${user.userName}`}>
               <Stack
                 direction="row"
                 spacing={2}
@@ -64,7 +74,6 @@ function SearchContent() {
                 </div>
               </Stack>
             </Link>
-            
           ))
         ) : (
           <div></div>
@@ -80,12 +89,12 @@ function SearchContent() {
 
 export default function Page() {
   return (
-    <CreateProfileProvider>
+  
       <AlertDialogProvider>
         <PageLayout>
           <SearchContent />
         </PageLayout>
       </AlertDialogProvider>
-    </CreateProfileProvider>
+
   );
 }

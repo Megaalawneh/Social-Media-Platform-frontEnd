@@ -2,10 +2,12 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { AppRouterCacheProvider } from "@mui/material-nextjs/v15-appRouter";
 import { ThemeProvider, CssBaseline } from "@mui/material";
-import PostDialogLayout from './components/PostDialogLayout'
+import PostDialogLayout from "./components/PostDialogLayout";
 import theme from "./theme";
 import "./globals.css";
 import Footer from "./components/Footer";
+import { NotificationsDrawerProvider } from "./Context/NotificationsDrawerContext";
+import { CreateProfileProvider } from "./Context/CreateProfileContext";
 const geistSans = Geist({
   variable: "--font-geist-sans",
   subsets: ["latin"],
@@ -31,15 +33,23 @@ export default function RootLayout({
       <body>
         <AppRouterCacheProvider>
           <ThemeProvider theme={theme}>
-            <PostDialogLayout>
-              <CssBaseline />
-              <main
-                style={{ flex: 1, display: "flex", flexDirection: "column" }}
-              >
-                {children}
-              </main>
-              <Footer />
-            </PostDialogLayout>
+            <CreateProfileProvider>
+              <PostDialogLayout>
+                <NotificationsDrawerProvider>
+                  <CssBaseline />
+                  <main
+                    style={{
+                      flex: 1,
+                      display: "flex",
+                      flexDirection: "column",
+                    }}
+                  >
+                    {children}
+                  </main>
+                  <Footer />
+                </NotificationsDrawerProvider>
+              </PostDialogLayout>
+            </CreateProfileProvider>
           </ThemeProvider>
         </AppRouterCacheProvider>
       </body>

@@ -49,4 +49,6 @@ body{
   padding: 9px !important;
   color: white !important;
 }
-
+.MuiPaper-root{
+  background-Color:rgb(35, 34, 34) !important;
+}

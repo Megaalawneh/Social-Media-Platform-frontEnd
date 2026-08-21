@@ -19,8 +19,11 @@ export default function CreateProfileReducer(state, action) {
         userBirthYear: inputData.userBirthYear,
         userFullName: inputData.userFullName,
         userProfilePic: inputData.userProfilePic,
-        userBio:"",
-
+        userBio: "",
+        followers: [],
+        following: [],
+        pending: [],
+        Notifications: [],
       };
 
       return { ...state, users: [...state.users, newUser] };
@@ -41,7 +44,7 @@ export default function CreateProfileReducer(state, action) {
 
     case "post": {
       const { previewUrl, caption, User, mediaType } = action.payload || {};
-      
+
       if (!previewUrl || !User?.userId) return state;
 
       const newPost = {
@@ -179,6 +182,118 @@ export default function CreateProfileReducer(state, action) {
               return true;
             }),
           };
+        }),
+      };
+    }
+    case "followUser": {
+      const { userFollower, userFollowing } = action.payload || {};
+
+      return {
+        ...state,
+        users: state.users.map((p) => {
+          if (p.userId === userFollower) {
+            const alreadyPending = p?.pending?.some(
+              (item) => item.userFollowing === userFollowing,
+            );
+
+            if (alreadyPending) return p;
+
+            return {
+              ...p,
+              pending: [...p.pending, { userFollower, userFollowing }],
+            };
+          }
+
+          if (p.userId === userFollowing) {
+            const notificationExists = p?.Notifications?.some(
+              (item) =>
+                item.userFollower === userFollower &&
+                item.type === "follow_request",
+            );
+
+            if (notificationExists) return p;
+
+            return {
+              ...p,
+              Notifications: [
+                ...p.Notifications,
+                {
+                  userFollower,
+                  type: "follow_request",
+                  message: "requested to follow you!",
+                },
+              ],
+            };
+          }
+
+          return p;
+        }),
+      };
+    }
+
+    case "unfollowUser": {
+      const { userFollower, userFollowing } = action.payload || {};
+      return {
+        ...state,
+        users: state.users.map((p) => {
+          if (p.userId === userFollower) {
+            return {
+              ...p,
+              pending: p.pending.filter((p) =>
+                p.userFollower === userFollower &&
+                p.userFollowing === userFollowing
+                  ? false
+                  : p,
+              ),
+            };
+          }
+          if (p.userId === userFollowing) {
+            return {
+              ...p,
+              Notifications: p.Notifications.filter((p) =>
+                p.userFollower === userFollower ? false : p,
+              ),
+            };
+          }
+          return p;
+        }),
+      };
+    }
+    case "ConfirmFollow": {
+      const { userId, userFollower } = action.payload || {};
+
+      return {
+        ...state,
+        users: state.users.map((u) => {
+          if (u.userId === userId) {
+            const followersExists = u?.followers?.some(
+              (item) => item.userFollower === userFollower,
+            );
+
+            if (followersExists) return u;
+
+            return {
+              ...u,
+              followers: [...u.followers, { userFollower }], Notifications: u.Notifications.filter((p) =>
+                p.userFollower === userFollower ? false : p,
+              ),
+            };
+          }
+        
+          if (u.userId === userFollower) {
+            return {
+              ...u,following: [...u.following, { userId }]
+              ,pending: u.pending.filter(
+                (p) =>
+                  !(
+                    p.userFollower === userFollower &&
+                    p.userFollowing === userId
+                  ),
+              ),
+            };
+          }
+
+          return u;
         }),
       };
     }

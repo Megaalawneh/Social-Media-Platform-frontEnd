@@ -7,6 +7,7 @@ const initialState = {
   posts: [],
   messages: [],
   Search: [],
+ 
 };
 export const CreateProfileProvider = ({ children }) => {
   const [inputData, setInputData] = useState({
@@ -42,7 +43,7 @@ export const CreateProfileProvider = ({ children }) => {
   useEffect(() => {
     localStorage.setItem("AppState", JSON.stringify(state));
   }, [state]);
-  const User = state.users?.[2] || {};
+  const User = state.users?.[1] || {};
   return (
     <CreateProfile.Provider
       value={{ state, dispatch, inputData, setInputData,User }}
