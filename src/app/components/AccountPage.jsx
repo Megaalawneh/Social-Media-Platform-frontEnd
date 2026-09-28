@@ -1,38 +1,56 @@
 "use client";
 import { Avatar, Typography } from "@mui/material";
 import { useContext, useState, useEffect, useMemo } from "react";
-import { CreateProfile } from "../Context/CreateProfileContext";
 import Button from "@mui/material/Button";
 import PicPost from "./PicPost";
 import Link from "next/link";
 import { useParams } from "next/navigation";
-
+import { FollowersDialogContext } from "../Context/FollowersDialogContext";
+import { AuthGuardContext } from "../Context/AuthGuardContext";
+import {
+  checkUserNameApi,
+  removePendingHandleApi,
+  followUserHandleApi,
+  handelRemoveFollowApi,
+} from "../api/users";
 export default function AccountPage() {
-  const avatarSrc = undefined;
-  const { state, User, dispatch } = useContext(CreateProfile);
-  const [isMounted, setIsMounted] = useState(false);
+  const { currentUser, setCurrentUser, posts } =
+    useContext(AuthGuardContext);
   const params = useParams();
-  const checkUserProvile = useMemo(
-    () => User.userName === params.userId,
-    [User.userName, params.userId],
-  );
-  const UserProfile = useMemo(
-    () => state.users?.find((user) => user.userName === params.userId),
-    [params.userId, state.users],
-  );
+  const { userId } = params;
+  const [profileUser, setProfileUser] = useState("");
+  useEffect(() => {
+    async function checkUserName() {
+      try {
+        const res = await checkUserNameApi(userId);
+        setProfileUser(res);
+      } catch (error) {
+        console.log(error);
+      }
+    }
+    checkUserName();
+  }, [userId]);
+
+  const avatarSrc = undefined;
+
+  const [isMounted, setIsMounted] = useState(false);
+  const { handleClickOpen } = useContext(FollowersDialogContext);
+
+  const checkUserProvile = currentUser?.userName === params.userId;
 
   const postCount = useMemo(
-    () => state.posts?.filter((p) => p.idUser === UserProfile.userId).length,
-    [UserProfile, state.posts],
-  );
-  const isFollowing = User.following?.some(
-    (u) => u.userId === UserProfile?.userId,
+    () => posts?.filter((p) => p.userId === profileUser?._id).length,
+    [profileUser?._id, posts],
   );
 
-  const isPending = User.pending?.some(
+  const isFollowing = profileUser?.followers?.some(
+    (f) => currentUser?._id == f.userFollower,
+  );
+
+  const isPending = currentUser?.pending?.some(
     (p) =>
-      p.userFollower === User?.userId &&
-      p.userFollowing === UserProfile?.userId,
+      p.userFollower === currentUser?._id &&
+      p.userFollowing === profileUser?._id,
   );
   useEffect(() => {
     function IsMounted() {
@@ -44,10 +62,40 @@ export default function AccountPage() {
   if (!isMounted) {
     return null;
   }
-  function handelFollowProfile({ type, payload }) {
-    dispatch({ type: type, payload: payload });
-  }
 
+  async function removePendingHandle({
+    pendingId,
+    userFollower,
+    userFollowing,
+  }) {
+    try {
+      const response = await removePendingHandleApi(
+        pendingId,
+        userFollower,
+        userFollowing,
+      );
+      setCurrentUser(response);
+    } catch (error) {
+      console.log(error);
+    }
+  }
+  async function followUserHandle({ userFollower, userFollowing }) {
+    try {
+      const res = await followUserHandleApi(userFollower, userFollowing);
+
+      setCurrentUser(res);
+    } catch (error) {
+      console.log(error);
+    }
+  }
+  async function handelRemoveFollow(userId) {
+    try {
+     const response = await handelRemoveFollowApi(userId);
+      setCurrentUser(response)
+    } catch (error) {
+      console.log(error);
+    }
+  }
   return (
     <>
       {checkUserProvile ? (
@@ -58,7 +106,7 @@ export default function AccountPage() {
             <div className="profileAvatar">
               <Avatar
                 alt="Upload new avatar"
-                src={avatarSrc || UserProfile?.userProfilePic}
+                src={avatarSrc || profileUser?.userProfilePic}
                 sx={{ width: 150, height: 150 }}
               />
               {/* profilePic of the user*/}
@@ -66,10 +114,10 @@ export default function AccountPage() {
               {/* information about username and name*/}
               <div className="profileInfo">
                 <Typography sx={{ fontSize: "24px" }}>
-                  {UserProfile?.userName || ""}
+                  {profileUser?.userName || ""}
                 </Typography>
                 <Typography variant="h7">
-                  {UserProfile?.userFullName || ""}
+                  {profileUser?.userFullName || ""}
                 </Typography>
                 {/* information about username and name*/}
 
@@ -84,21 +132,27 @@ export default function AccountPage() {
                   <Typography
                     variant="h7"
                     sx={{ margin: "10px 10px 10px 0px" }}
+                    onClick={() => {
+                      handleClickOpen("followers");
+                    }}
                   >
-                    {`${UserProfile?.followers.length} followers` || ""}
+                    {`${profileUser?.followers?.length} followers` || ""}
                   </Typography>
                   <Typography
                     variant="h7"
                     sx={{ margin: "10px 10px 10px 0px" }}
+                    onClick={() => {
+                      handleClickOpen("following");
+                    }}
                   >
-                    {`${UserProfile?.following.length} followers` || ""}
+                    {`${profileUser?.following?.length} following` || ""}
                   </Typography>
                   {/* information about followers and following*/}
                 </div>
 
                 {/* information about bio*/}
                 <div className="profileBio">
-                  <Typography variant="h7">{UserProfile.userBio}</Typography>
+                  <Typography variant="h7">{profileUser.userBio}</Typography>
                 </div>
               </div>
               {/* information about bio*/}
@@ -106,7 +160,7 @@ export default function AccountPage() {
             {/* btn for edit the user account*/}
             <div className="profileBtn">
               <div>
-                {UserProfile.userName == params.userId ? (
+                {profileUser.userName == params.userId ? (
                   <Link href={`/mainPage/accounts/edit`}>
                     <Button
                       variant="contained"
@@ -127,10 +181,16 @@ export default function AccountPage() {
             {/* btn for edit the user account*/}
             {/* user Posts*/}
             <div className="profilePosts">
-              {state.posts
-                ?.filter((p) => p.idUser === UserProfile.userId)
+              {posts
+                ?.filter((p) => p.userId === profileUser?._id)
                 .map((p) => (
-                  <PicPost key={p.idPost} img={p.media} id={p.idPost} />
+                  <PicPost
+                    key={p._id}
+                    img={p.media}
+                    id={p._id}
+                    mediaType={p.mediaType}
+                    p={p}
+                  />
                 ))}
             </div>
           </div>
@@ -144,7 +204,7 @@ export default function AccountPage() {
             <div className="profileAvatar">
               <Avatar
                 alt="Upload new avatar"
-                src={avatarSrc || UserProfile?.userProfilePic}
+                src={avatarSrc || profileUser?.userProfilePic}
                 sx={{ width: 150, height: 150 }}
               />
               {/* profilePic of the user*/}
@@ -152,10 +212,10 @@ export default function AccountPage() {
               {/* information about username and name*/}
               <div className="profileInfo">
                 <Typography sx={{ fontSize: "24px" }}>
-                  {UserProfile?.userName || ""}
+                  {profileUser?.userName || ""}
                 </Typography>
                 <Typography variant="h7">
-                  {UserProfile?.userFullName || ""}
+                  {profileUser?.userFullName || ""}
                 </Typography>
                 {/* information about username and name*/}
 
@@ -170,22 +230,38 @@ export default function AccountPage() {
                   <Typography
                     variant="h7"
                     sx={{ margin: "10px 10px 10px 0px" }}
+                    onClick={() => {
+                      handleClickOpen("followers");
+                    }}
                   >
-                    {`${UserProfile?.followers.length} followers` || ""}
+                    {`${profileUser?.followers?.length} followers` || ""}
                   </Typography>
                   <Typography
                     variant="h7"
                     sx={{ margin: "10px 10px 10px 0px" }}
+                    onClick={() => {
+                      handleClickOpen("following");
+                    }}
                   >
-                    {`${UserProfile?.following.length} followers` || ""}
+                    {`${profileUser?.following?.length} following` || ""}
                   </Typography>
                   {/* information about followers and following*/}
                 </div>
 
                 {/* information about bio*/}
                 <div className="profileBio">
-                  <Typography variant="h7">{UserProfile?.userBio}</Typography>
+                  <Typography variant="h7">{profileUser?.userBio}</Typography>
                 </div>
+                {profileUser?._id && (
+                  <Link href={`/mainPage/direct?userId=${profileUser._id}`}>
+                    <Button
+                      variant="outlined"
+                      sx={{ mt: 2, color: "white", borderColor: "white" }}
+                    >
+                      Message
+                    </Button>
+                  </Link>
+                )}
               </div>
               {/* information about bio*/}
             </div>
@@ -203,13 +279,7 @@ export default function AccountPage() {
                       marginLeft: "150px",
                     }}
                     onClick={() => {
-                      handelFollowProfile({
-                        type: "null",
-                        payload: {
-                          userFollower: User.userId,
-                          userFollowing: UserProfile.userId,
-                        },
-                      });
+                      handelRemoveFollow(profileUser._id);
                     }}
                   >
                     Following
@@ -225,13 +295,19 @@ export default function AccountPage() {
                       marginLeft: "150px",
                     }}
                     onClick={() => {
-                      handelFollowProfile({
-                        type: "unfollowUser",
-                        payload: {
-                          userFollower: User.userId,
-                          userFollowing: UserProfile.userId,
-                        },
-                      });
+                      const pendingRequest = currentUser.pending?.find(
+                        (p) =>
+                          p.userFollower === currentUser._id &&
+                          p.userFollowing === profileUser._id,
+                      );
+
+                      if (pendingRequest) {
+                        removePendingHandle({
+                          pendingId: pendingRequest._id,
+                          userFollower: currentUser._id,
+                          userFollowing: profileUser._id,
+                        });
+                      }
                     }}
                   >
                     Pending Request
@@ -246,12 +322,9 @@ export default function AccountPage() {
                       marginLeft: "150px",
                     }}
                     onClick={() => {
-                      handelFollowProfile({
-                        type: "followUser",
-                        payload: {
-                          userFollower: User.userId,
-                          userFollowing: UserProfile.userId,
-                        },
+                      followUserHandle({
+                        userFollower: currentUser._id,
+                        userFollowing: profileUser._id,
                       });
                     }}
                   >
@@ -264,10 +337,16 @@ export default function AccountPage() {
             {/* btn for edit the user account*/}
             {/* user Posts*/}
             <div className="profilePosts">
-              {state.posts
-                ?.filter((p) => p.idUser === UserProfile.userId)
+              {posts
+                ?.filter((p) => p.userId === profileUser?._id)
                 .map((p) => (
-                  <PicPost key={p.idPost} img={p.media} id={p.idPost} />
+                  <PicPost
+                    key={p._id}
+                    img={p.media}
+                    id={p._id}
+                    mediaType={p.mediaType}
+                    p={p}
+                  />
                 ))}
             </div>
           </div>

@@ -1,17 +1,17 @@
+"use client";
 import Container from "@mui/material/Container";
 import "../styles/mainPageStyle.css";
 import Post from "../components/Post";
-import Weather from "../components/weatherApi";
+import Weather from "../components/weatherPage";
 import PageLayout from "../components/PageLayout";
-import { CreateProfileProvider } from "../Context/CreateProfileContext";
 import { AlertDialogProvider } from "../Context/alertDialogContext";
 import { CommentDialogProvider } from "../Context/commentDialogContext";
-export default function page() {
+
+export default function Page() {
   return (
     <>
-      <CreateProfileProvider>
-        <PageLayout>
-     
+
+          <PageLayout>
             <Container maxWidth="xl" className="mainPageContainer">
               <main>
                 <AlertDialogProvider>
@@ -24,9 +24,8 @@ export default function page() {
                 <Weather />
               </aside>
             </Container>
-          
-        </PageLayout>
-      </CreateProfileProvider>
+          </PageLayout>
+    
     </>
   );
 }

@@ -7,7 +7,6 @@ import DialogContentText from "@mui/material/DialogContentText";
 import DialogTitle from "@mui/material/DialogTitle";
 import { alertDialogContext } from "../Context/alertDialogContext";
 import { useContext } from "react";
-import { CreateProfile } from "../Context/CreateProfileContext";
 import { styled } from "@mui/material/styles";
 
 const BootstrapDialog = styled(Dialog)(({ theme }) => ({
@@ -34,12 +33,8 @@ const BootstrapDialog = styled(Dialog)(({ theme }) => ({
 }));
 
 export default function AlertDialog() {
-  const { info, open, handleClose } =
-    useContext(alertDialogContext);
-  const { dispatch } = useContext(CreateProfile);
-  const handleDelete = () => {
-    dispatch({ type: info.type, payload: info.payload });
-  };
+  const { info, open, handleClose } = useContext(alertDialogContext);
+  
   return (
     <>
       <BootstrapDialog
@@ -64,10 +59,11 @@ export default function AlertDialog() {
             sx={{ color: info.colorBtn }}
             onClick={() => {
               handleClose();
-              handleDelete();
-             if( info.functionHandle){
-               info.functionHandle();
-             }
+              info.payload();
+              
+              if (info.functionHandle) {
+                info.functionHandle();
+              }
             }}
           >
             {info.alertName || ""}

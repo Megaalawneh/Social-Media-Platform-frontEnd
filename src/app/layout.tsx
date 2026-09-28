@@ -8,6 +8,8 @@ import "./globals.css";
 import Footer from "./components/Footer";
 import { NotificationsDrawerProvider } from "./Context/NotificationsDrawerContext";
 import { CreateProfileProvider } from "./Context/CreateProfileContext";
+import { FollowersDialogProvider } from "./Context/FollowersDialogContext";
+import { AuthGuardProvider } from "./Context/AuthGuardContext";
 const geistSans = Geist({
   variable: "--font-geist-sans",
   subsets: ["latin"],
@@ -32,25 +34,29 @@ export default function RootLayout({
     <html lang="en" className={`${geistSans.variable} ${geistMono.variable}`}>
       <body>
         <AppRouterCacheProvider>
-          <ThemeProvider theme={theme}>
-            <CreateProfileProvider>
-              <PostDialogLayout>
-                <NotificationsDrawerProvider>
-                  <CssBaseline />
-                  <main
-                    style={{
-                      flex: 1,
-                      display: "flex",
-                      flexDirection: "column",
-                    }}
-                  >
-                    {children}
-                  </main>
-                  <Footer />
-                </NotificationsDrawerProvider>
-              </PostDialogLayout>
-            </CreateProfileProvider>
-          </ThemeProvider>
+          <AuthGuardProvider>
+            <ThemeProvider theme={theme}>
+              <CreateProfileProvider>
+                <PostDialogLayout>
+                  <NotificationsDrawerProvider>
+                    <FollowersDialogProvider>
+                      <CssBaseline />
+                      <main
+                        style={{
+                          flex: 1,
+                          display: "flex",
+                          flexDirection: "column",
+                        }}
+                      >
+                        {children}
+                      </main>
+                      <Footer />
+                    </FollowersDialogProvider>
+                  </NotificationsDrawerProvider>
+                </PostDialogLayout>
+              </CreateProfileProvider>
+            </ThemeProvider>
+          </AuthGuardProvider>
         </AppRouterCacheProvider>
       </body>
     </html>

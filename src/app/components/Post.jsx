@@ -7,7 +7,6 @@ import CardHeader from "@mui/material/CardHeader";
 import CardMedia from "@mui/material/CardMedia";
 import CommentIcon from "@mui/icons-material/Comment";
 import CardActions from "@mui/material/CardActions";
-import Avatar from "@mui/material/Avatar";
 import IconButton from "@mui/material/IconButton";
 import FavoriteIcon from "@mui/icons-material/Favorite";
 import ShareIcon from "@mui/icons-material/Share";
@@ -15,16 +14,45 @@ import MoreVertIcon from "@mui/icons-material/MoreVert";
 import VolumeUpIcon from "@mui/icons-material/VolumeUp";
 import VolumeOffIcon from "@mui/icons-material/VolumeOff";
 import PlayArrowIcon from "@mui/icons-material/PlayArrow";
-import { CreateProfile } from "../Context/CreateProfileContext";
 import { useContext, useState, useEffect, useRef, useMemo } from "react";
 import { alertDialogContext } from "../Context/alertDialogContext";
 import { CommentDialogContext } from "../Context/commentDialogContext";
-function PostItem({ p, state, dispatch, idUser, user, setInfo, handleOpen ,handleClickOpen,setPostId}) {
+import { AuthGuardContext } from "../Context/AuthGuardContext";
+import Link from "next/link";
+import C_Avatar from "./C_Avatar";
+import { handleDeletePostApi, handleAddPostLikeApi } from "../api/posts";
+import { getUserByIdApi } from "../api/users";
+import SharePostDialog from "./SharePostDialog";
+import { useSocket } from "../Context/SocketContext";
+function PostItem({
+  p,
+  user,
+  setInfo,
+  handleOpen,
+  handleClickOpen,
+  setPostId,
+  refreshPosts,
+  setPosts,
+}) {
+  const [profileUser, setProfileUser] = useState("");
+  console.log(p)
+  useEffect(() => {
+    async function checkUserName() {
+      try {
+        const res = await getUserByIdApi(p.userId);
 
+        setProfileUser(res);
+      } catch (error) {
+        console.log(error);
+      }
+    }
+    checkUserName();
+  }, [p.userId]);
   const [anchorEl, setAnchorEl] = useState(null);
+  const [shareDialogOpen, setShareDialogOpen] = useState(false);
   const open = Boolean(anchorEl);
   const ITEM_HEIGHT = 48;
-  
+
   const handleClick = (event) => {
     setAnchorEl(event.currentTarget);
   };
@@ -33,11 +61,21 @@ function PostItem({ p, state, dispatch, idUser, user, setInfo, handleOpen ,handl
     setAnchorEl(null);
   };
 
-  function handlelPost(event, idPost, userId) {
-    dispatch({ type: event, payload: { userId, idPost } });
+  async function handleAddlike(postId) {
+    try {
+      const res = await handleAddPostLikeApi(postId);
+      setPosts((prevPost) =>
+        prevPost.map((post) => (post._id == res._id ? res : post)),
+      );
+    } catch (error) {
+      console.error(
+        "Error adding Like:",
+        error.response?.data || error.message,
+      );
+    }
   }
 
-  const author = state.users?.find((u) => u.userId === p.idUser);
+  const author = profileUser;
   const authorProfilePic = author ? author.userProfilePic : undefined;
   const authorName = author ? author.userName : "Unknown User";
   const videoRef = useRef(null);
@@ -54,7 +92,9 @@ function PostItem({ p, state, dispatch, idUser, user, setInfo, handleOpen ,handl
       setIsPlaying(false);
     }
   };
-
+  const like = useMemo(() => {
+    return p?.likes?.some((like) => like.userId === user?._id);
+  }, [p?.likes, user?._id]);
   const handleMute = (event) => {
     event.stopPropagation();
 
@@ -63,12 +103,46 @@ function PostItem({ p, state, dispatch, idUser, user, setInfo, handleOpen ,handl
     videoRef.current.muted = !videoRef.current.muted;
     setIsMuted(videoRef.current.muted);
   };
-  const like = useMemo(() => {
-    return p.likedCount.some((like) => like.userId === user.userId);
-  }, [p.likedCount, user.userId]);
+  function handleDeletPost({ postId }) {
+    setInfo({
+      Title: "Deleting The Post!!",
+      Name: "Do You Want To Delete The Post?",
+      alertName: "Delete",
+      type: "deletePost",
+      colorBtn: "red !important",
+      payload: async () => {
+        try {
+          await handleDeletePostApi(postId);
+          await refreshPosts();
+        } catch (error) {
+          console.log(error);
+        }
+      },
+    });
+  }
+  function formatRelativeTime(dateString) {
+    const now = new Date();
+    const past = new Date(dateString);
+    const msPerMinute = 60 * 1000;
+    const msPerHour = msPerMinute * 60;
+    const msPerDay = msPerHour * 24;
+
+    const elapsed = now - past;
+
+    if (elapsed < msPerMinute) {
+      const seconds = Math.round(elapsed / 1000);
+      return `${seconds <= 0 ? 1 : seconds}s ago`;
+    }
+    if (elapsed < msPerHour) {
+      return `${Math.round(elapsed / msPerMinute)}m ago`;
+    }
+    if (elapsed < msPerDay) {
+      return `${Math.round(elapsed / msPerHour)}h ago`;
+    }
+    return `${Math.round(elapsed / msPerDay)}d ago`;
+  }
   return (
-    
-  <div className="postContainer">
+    <div className="postContainer">
       <Card
         sx={{
           width: "100%",
@@ -95,11 +169,23 @@ function PostItem({ p, state, dispatch, idUser, user, setInfo, handleOpen ,handl
             },
           }}
           avatar={
-            <Avatar
-              alt={authorName}
-              src={authorProfilePic}
-              sx={{ width: 40, height: 40, border: "2px solid #2c2f36" }}
-            />
+            <>
+              {" "}
+              <C_Avatar
+                authorName={authorName}
+                authorProfilePic={authorProfilePic}
+                LinkTogo={`/mainPage/${profileUser?.userName}`}
+              />
+              <Typography
+                variant="caption"
+                className="timestamp"
+                sx={{ ml: 1,mt:1 }}
+              >
+                {p?.createdAt
+                  ? formatRelativeTime(p.createdAt)
+                  : "Just now"}
+              </Typography>
+            </>
           }
           action={
             <div>
@@ -138,14 +224,7 @@ function PostItem({ p, state, dispatch, idUser, user, setInfo, handleOpen ,handl
               >
                 <MenuItem
                   onClick={() => {
-                    setInfo({
-                      Title: "Deleting The Post!!",
-                      Name: "Do You Want To Delete The Post?",
-                      alertName: "Delete",
-                      type: "deletePost",
-                      colorBtn: "red !important",
-                      payload: { idPost: p.idPost, idUser },
-                    });
+                    handleDeletPost({ postId: p._id });
                     handleOpen();
                     handleClose();
                   }}
@@ -155,7 +234,6 @@ function PostItem({ p, state, dispatch, idUser, user, setInfo, handleOpen ,handl
               </Menu>
             </div>
           }
-          title={authorName}
           subheader={p.data}
         />
         {p.mediaType === "video" ? (
@@ -167,6 +245,10 @@ function PostItem({ p, state, dispatch, idUser, user, setInfo, handleOpen ,handl
               maxHeight: "75vh",
               overflow: "hidden",
               bgcolor: "#000",
+            }}
+            onClick={() => {
+              handleClickOpen();
+              setPostId(p._id);
             }}
           >
             <Box
@@ -288,7 +370,7 @@ function PostItem({ p, state, dispatch, idUser, user, setInfo, handleOpen ,handl
           <IconButton
             aria-label="add to favorites"
             onClick={() => {
-              handlelPost("postLiked", p.idPost, user.userId);
+              handleAddlike(p._id);
             }}
           >
             <FavoriteIcon
@@ -306,17 +388,19 @@ function PostItem({ p, state, dispatch, idUser, user, setInfo, handleOpen ,handl
                 marginLeft: "6px",
               }}
             >
-              {p.likedCount?.length ?? 0}
+              {p.likes?.length ?? 0}
             </Typography>
           </IconButton>
           <IconButton
             aria-label="Comment"
             sx={{ color: "#9ca3af", borderRadius: "999px" }}
           >
-            <CommentIcon onClick={()=>{
-              handleClickOpen()
-              setPostId(p.idPost)
-            }} />
+            <CommentIcon
+              onClick={() => {
+                handleClickOpen();
+                setPostId(p._id);
+              }}
+            />
             <Typography
               component="span"
               variant="caption"
@@ -324,31 +408,30 @@ function PostItem({ p, state, dispatch, idUser, user, setInfo, handleOpen ,handl
                 display: "block",
                 color: "#8f9197",
                 marginTop: "4px",
+                marginLeft: "6px",
               }}
             >
-              {p?.CommentCount.length}
+              {p?.comments?.length}
             </Typography>
           </IconButton>
           <IconButton
             aria-label="share"
             sx={{ color: "#9ca3af", borderRadius: "999px" }}
             onClick={() => {
-                handlelPost("postShare", p.idPost, user.userId);
-              }}
+              setShareDialogOpen(true);
+            }}
           >
-            <ShareIcon  />
+            <ShareIcon />
             <Typography
               component="span"
               variant="caption"
-               
               sx={{
                 display: "block",
                 color: "#8f9197",
                 marginTop: "4px",
               }}
-             
             >
-              {p.ShareCount?.length??0}
+              {p.shares?.length ?? 0}
             </Typography>
           </IconButton>
         </CardActions>
@@ -364,33 +447,43 @@ function PostItem({ p, state, dispatch, idUser, user, setInfo, handleOpen ,handl
             padding: "8px 16px 16px",
           }}
         >
-          <Typography
-            component="span"
-            variant="caption"
-            sx={{
-              fontWeight: 600,
-              color: "#fff",
-            }}
-          >
-            {state.users.map((u) => {
-              return u.userId === p.idUser ? u.userName : "";
-            })}
-          </Typography>{" "}
+          <Link href={`/mainPage/${profileUser?.userName}`}>
+            <Typography
+              component="span"
+              variant="caption"
+              sx={{
+                fontWeight: 600,
+                color: "#fff",
+              }}
+            >
+              {profileUser.userName}
+            </Typography>
+          </Link>{" "}
           {p.postCaption}
         </Typography>
       </Card>
+      <SharePostDialog
+        open={shareDialogOpen}
+        post={p}
+        onClose={() => setShareDialogOpen(false)}
+        onShared={(updatedPost) =>
+          setPosts((currentPosts) =>
+            currentPosts.map((post) =>
+              post._id === updatedPost._id ? updatedPost : post,
+            ),
+          )
+        }
+      />
     </div>
-  
-  
   );
 }
 
 export default function Post() {
-  const { state, dispatch,User } = useContext(CreateProfile);
-  
-  
+  const { currentUser, posts, setPosts, refreshPosts } =
+    useContext(AuthGuardContext);
+  const { socket } = useSocket();
   const { setInfo, handleOpen } = useContext(alertDialogContext);
- const {handleClickOpen,setPostId} =useContext(CommentDialogContext)
+  const { handleClickOpen, setPostId } = useContext(CommentDialogContext);
   const [isMounted, setIsMounted] = useState(false);
 
   useEffect(() => {
@@ -400,25 +493,38 @@ export default function Post() {
     IsMounted();
   }, []);
 
+  useEffect(() => {
+    if (!socket) return undefined;
+
+    const handlePostSharesUpdated = ({ _id, shares }) => {
+      setPosts((currentPosts) =>
+        currentPosts.map((post) =>
+          post._id === _id ? { ...post, shares } : post,
+        ),
+      );
+    };
+    socket.on("post:shares-updated", handlePostSharesUpdated);
+    return () => socket.off("post:shares-updated", handlePostSharesUpdated);
+  }, [socket, setPosts]);
+
   if (!isMounted) {
     return null;
   }
 
   return (
     <>
-      {state?.posts && state.posts?.length > 0 ? (
-        state.posts?.map((p) => (
+      {posts && posts?.length > 0 ? (
+        posts?.map((p) => (
           <PostItem
-            key={p?.idPost}
+            key={p?._id}
             p={p}
-            state={state}
-            dispatch={dispatch}
-            idUser={User.userId}
-            user={User}
+            user={currentUser}
             setInfo={setInfo}
             handleOpen={handleOpen}
             handleClickOpen={handleClickOpen}
             setPostId={setPostId}
+            refreshPosts={refreshPosts}
+            setPosts={setPosts}
           />
         ))
       ) : (

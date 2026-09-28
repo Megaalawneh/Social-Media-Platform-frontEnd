@@ -7,32 +7,58 @@ import Button from "@mui/material/Button";
 import SaveAsIcon from "@mui/icons-material/SaveAs";
 import ButtonBase from "@mui/material/ButtonBase";
 import { useContext } from "react";
-import {
-  CreateProfile,
-  CreateProfileProvider,
-} from "../../../Context/CreateProfileContext";
+import { AuthGuardContext } from "../../../Context/AuthGuardContext";
 import { AlertDialogProvider } from "../../../Context/alertDialogContext";
 import { alertDialogContext } from "../../../Context/alertDialogContext";
+import axios from "axios";
+import { API_BASE_URL } from "../../../api/config";
+import { geocodeCityApi } from "../../../api/users";
+
+function getDateValue(value) {
+  if (typeof value === "string") return value.slice(0, 10);
+  return value instanceof Date ? value.toISOString().slice(0, 10) : "";
+}
+
+function isValidBirthDate(value) {
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(value)) return false;
+  const date = new Date(`${value}T00:00:00.000Z`);
+  return (
+    !Number.isNaN(date.getTime()) &&
+    date.toISOString().slice(0, 10) === value &&
+    date <= new Date()
+  );
+}
 
 function EditAccountForm() {
   const [isHydrated, setIsHydrated] = useState(false);
   const [avatarSrc, setAvatarSrc] = useState(undefined);
-  const { state ,User} = useContext(CreateProfile);
-  const { userProfilePic } = User;
+  const { currentUser, setCurrentUser } = useContext(AuthGuardContext);
+  const { userProfilePic } = currentUser || {};
   const [inputEdit, setInputEdit] = useState("");
   const { handleOpen, setInfo } = useContext(alertDialogContext);
   const [value, setValue] = useState(true);
+  const [isSaving, setIsSaving] = useState(false);
+  const [saveError, setSaveError] = useState("");
 
   useEffect(() => {
     function me() {
       setIsHydrated(true);
-      setInputEdit(User);
+      setInputEdit(
+        currentUser
+          ? {
+              ...currentUser,
+              userPassword: "",
+              userCityName: currentUser.userCity?.name || "",
+            }
+          : "",
+      );
     }
     me();
-  }, [state,User]);
+  }, [currentUser]);
 
   const handleFieldChange = (field) => (event) => {
     const value = event.target.value;
+    setSaveError("");
     setInputEdit((prev) => {
       const updatedValue = {
         ...prev,
@@ -43,36 +69,128 @@ function EditAccountForm() {
   };
   useEffect(() => {
     function validinputData() {
-      const validFullName = /^[A-Za-z]/.test(inputEdit?.userFullName);
-      const validUserName = /^[A-Za-z][A-Za-z0-9]*$/.test(inputEdit?.userName);
+      if (!currentUser || !inputEdit?._id) {
+        setValue(true);
+        return;
+      }
+
+      const fullNameChanged =
+        (inputEdit?.userFullName ?? "") !== (currentUser.userFullName ?? "");
+      const userNameChanged =
+        (inputEdit?.userName ?? "") !== (currentUser.userName ?? "");
+      const bioChanged =
+        (inputEdit?.userBio ?? "") !== (currentUser.userBio ?? "");
+      const validFullName =
+        !fullNameChanged ||
+        (typeof inputEdit?.userFullName === "string" &&
+          /^[A-Za-z]/.test(inputEdit.userFullName));
+      const validUserName =
+        !userNameChanged ||
+        (inputEdit?.userName?.length >= 6 &&
+          /^[A-Za-z][A-Za-z0-9]*$/.test(inputEdit.userName));
+      const password = inputEdit?.userPassword || "";
       const validUserPassword =
-        /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$%]).{8,}$/.test(
-          inputEdit.userPassword,
-        );
-      if (
-        inputEdit?.userName?.length >= 6 &&
-        inputEdit?.userBio?.length <= 100 &&
-        inputEdit?.userFullName !== "" &&
+        !password ||
+        /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$%]).{8,}$/.test(password);
+      const birthDateValue = getDateValue(inputEdit?.userBirthDate);
+      const birthDateChanged =
+        birthDateValue !== getDateValue(currentUser.userBirthDate);
+      const cityName = inputEdit?.userCityName?.trim() || "";
+      const currentCityName = currentUser.userCity?.name?.trim() || "";
+      const cityChanged = cityName !== currentCityName;
+      const isValid =
+        (!bioChanged || (inputEdit?.userBio || "").length <= 100) &&
+        (!birthDateChanged || isValidBirthDate(birthDateValue)) &&
+        (!cityChanged || Boolean(cityName)) &&
         validFullName &&
         validUserName &&
-        validUserPassword
-      ) {
-        setValue(false);
-      } else {
-        setValue(true);
-      }
+        validUserPassword;
+      const changedFields = [
+        "userFullName",
+        "userEmail",
+        "userName",
+        "userBio",
+        "userProfilePic",
+      ];
+      const hasChanges =
+        Boolean(password) ||
+        changedFields.some(
+          (field) => (inputEdit[field] ?? "") !== (currentUser[field] ?? ""),
+        ) ||
+        birthDateChanged ||
+        cityChanged;
+
+      setValue(!isValid || !hasChanges);
     }
     validinputData();
-  }, [inputEdit]);
+  }, [inputEdit, currentUser]);
 
   const handleSave = () => {
-    if (!inputEdit?.userId) return;
+    if (!inputEdit?._id) return;
     setInfo({
       Title: "Change the Proflie!",
       Name: "Are You Sure you Want To Change The Proflie? ",
       alertName: "Change",
       type: "editProfile",
-      payload: { inputEdit },
+      payload: async () => {
+        const {
+          userFullName,
+          userEmail,
+          userName,
+          userPassword,
+          userBio,
+          userProfilePic,
+          userBirthDate,
+        } = inputEdit;
+        setIsSaving(true);
+        try {
+          const updates = {
+            userFullName,
+            userEmail,
+            userName,
+            userPassword,
+            userBio,
+            userProfilePic,
+          };
+          if (
+            getDateValue(userBirthDate) !==
+            getDateValue(currentUser?.userBirthDate)
+          ) {
+            updates.userBirthDate = getDateValue(userBirthDate);
+          }
+          if (
+            inputEdit.userCityName.trim() !==
+            (currentUser?.userCity?.name?.trim() || "")
+          ) {
+            updates.userCity = await geocodeCityApi(inputEdit.userCityName);
+          }
+
+          const response = await axios.put(
+            `${API_BASE_URL}/user`,
+            updates,
+            {
+              withCredentials: true,
+            },
+          );
+
+          setCurrentUser(response.data.user);
+          setInputEdit({
+            ...response.data.user,
+            userPassword: "",
+            userCityName: response.data.user.userCity?.name || "",
+          });
+          setAvatarSrc(undefined);
+          setSaveError("");
+        } catch (error) {
+          setSaveError(
+            error.response?.data?.error ||
+              error.response?.data?.message ||
+              "Please check your city and profile details, then try again.",
+          );
+        } finally {
+          setIsSaving(false);
+        }
+      },
       colorBtn: "blue !important",
     });
     handleOpen();
@@ -179,11 +297,11 @@ function EditAccountForm() {
               id={"outlined-password-input"}
               label={"Password"}
               type={"password"}
-              required={true}
+              required={false}
               value={inputEdit?.userPassword || ""}
               onChange={handleFieldChange("userPassword")}
               placeholder={
-                "password must be 8 characters and 1 uppercase letter and 1 lowercase letter and @ $ %"
+                "Leave blank to keep current password; new password needs 8 characters, upper/lowercase, a number, and @ $ %"
               }
             />
             <CustomTextFields
@@ -208,17 +326,40 @@ function EditAccountForm() {
               id={"outlined-basic"}
               label={"Bio"}
               type={"text"}
-               placeholder={"100 character maximum"}
+              placeholder={"100 character maximum"}
               required={true}
               value={inputEdit?.userBio || ""}
               onChange={handleFieldChange("userBio")}
             />
+            <CustomTextFields
+              id="user-birth-date"
+              label="Date of birth"
+              type="date"
+              value={
+                getDateValue(inputEdit?.userBirthDate)
+              }
+              onChange={handleFieldChange("userBirthDate")}
+            />
+            <CustomTextFields
+              id="user-city"
+              label="City"
+              type="text"
+              required
+              value={inputEdit?.userCityName || ""}
+              onChange={handleFieldChange("userCityName")}
+              placeholder="Enter your city"
+            />
+            {saveError && (
+              <Typography color="error" role="alert" sx={{ mt: 1 }}>
+                {saveError}
+              </Typography>
+            )}
             <Button
               variant="contained"
               endIcon={<SaveAsIcon />}
               sx={{ marginTop: "20px" }}
               onClick={handleSave}
-              disabled={value}
+              disabled={value || isSaving}
             >
               save changes
             </Button>
@@ -231,10 +372,8 @@ function EditAccountForm() {
 
 export default function Page() {
   return (
-    <CreateProfileProvider>
-      <AlertDialogProvider>
-        <EditAccountForm />
-      </AlertDialogProvider>
-    </CreateProfileProvider>
+    <AlertDialogProvider>
+      <EditAccountForm />
+    </AlertDialogProvider>
   );
 }

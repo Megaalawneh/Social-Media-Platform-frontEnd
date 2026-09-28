@@ -1,104 +1,97 @@
-+# PathWebSite
-+
-+PathWebSite is a front-end social-media prototype built with Next.js, React, and Material UI. It provides local profile management, image posts, profile search, a demo direct-message interface, and a weather card.
-+
-+> This is a learning/demo project. It has no backend or production authentication system, so do not use real personal information or passwords.
-+
-+## Features
-+
-+- Create, edit, and search user profiles
-+- Form validation for usernames, passwords, and dates of birth
-+- Create image posts with captions
-+- Like and delete posts
-+- Browser-local state persistence with `localStorage`
-+- Profile search by username prefix
-+- Demo direct messages with an emoji picker
-+- Current weather card powered by OpenWeatherMap
-+
-+## Tech stack
-+
-+- [Next.js](https://nextjs.org/) 16
-+- [React](https://react.dev/) 19
-+- [Material UI](https://mui.com/)
-+- Emotion
-+- `uuid` for client-side IDs
-+- `moment` for post dates
-+- `emoji-picker-react`
-+
-+## Getting started
-+
-+### Prerequisites
-+
-+- A current Node.js LTS release
-+- npm
-+
-+### Install and run
-+
-+From the application directory:
-+
-+```bash
-+cd my-app
-+npm install
-+npm run dev
-+```
-+
-+Open [http://localhost:3000](http://localhost:3000) in your browser.
-+
-+For a clean install from the lockfile, use `npm ci` instead of `npm install`.
-+
-+## Scripts
-+
-+| Command | Description |
-+| --- | --- |
-+| `npm run dev` | Starts the development server. |
-+| `npm run build` | Creates a production build. |
-+| `npm run start` | Starts the production server after building. |
-+| `npm run lint` | Runs ESLint. |
-+
-+## Routes
-+
-+| Route | Purpose |
-+| --- | --- |
-+| `/` | Login screen |
-+| `/mainPage` | Main feed and weather card |
-+| `/mainPage/Search` | Profile search |
-+| `/mainPage/direct` | Demo direct messages |
-+| `/mainPage/accounts/emailsignup` | Create account |
-+| `/mainPage/accounts/edit` | Edit profile |
-+| `/mainPage/accounts/password/reset` | Password-reset screen |
-+
-+## Project structure
-+
-+```text
-+my-app/
-+└── src/app/
-+    ├── Context/        # Shared React context and local-state persistence
-+    ├── Reducer/        # Profile, post, like, delete, and search actions
-+    ├── components/     # Reusable UI, post, weather, and dialog components
-+    ├── mainPage/       # Feed, search, messaging, and account routes
-+    ├── styles/         # Page-specific CSS
-+    ├── layout.tsx      # App-wide Material UI theme and layout
-+    └── page.tsx        # Login route
-+```
-+
-+## Data and API notes
-+
-+- Profiles and posts are stored in the browser under the `AppState` `localStorage` key. Clearing browser site data resets the demo data.
-+- Profile pictures and post media use browser object URLs, so uploaded media will not persist after a page reload.
-+- The weather card requests OpenWeatherMap data for fixed coordinates. It requires an internet connection and a valid API key.
-+
-+## Known limitations
-+
-+- This is a client-side demo: there is no database, backend API, real login flow, or server-side message storage.
-+- Passwords are saved in plain text in browser storage. Never use real credentials.
-+- Direct-message contacts and conversations are seeded demo data.
-+- The password-reset page is UI-only.
-+- Before deploying, move the OpenWeatherMap key out of source code and into an environment variable.
-+
-+## Development notes
-+
-+The app currently initializes shared state from `localStorage` during rendering. With Next.js server rendering, existing browser data can cause a hydration mismatch. Load stored data after the component mounts to avoid that issue.
-+
-+## License
-+
-+No license has been specified for this project.
+# Path Web Frontend
+
+Next.js frontend for Path, a social application with profiles, posts, follows, notifications, direct messages, and weather information. The frontend uses the Express backend in `../pathProject-BackEnd` for account data, sessions, posts, and real-time messaging.
+
+## Features
+
+- Account creation, login, profile editing, and profile search
+- Create and browse image and video posts
+- Like, comment on, and share posts
+- Follow users and view notifications
+- Persistent direct messages with online and typing indicators
+- Weather information based on the signed-in user's saved city
+- Responsive layouts for feed and messaging pages
+
+## Requirements
+
+- Node.js 20 or later
+- npm
+- The Path backend running and configured; see its README for setup
+
+## Local setup
+
+Install frontend dependencies:
+
+```powershell
+npm install
+```
+
+Create `.env.local` in this directory:
+
+```env
+NEXT_PUBLIC_API_URL=http://localhost:3001
+OPENWEATHER_API_KEY=your_openweathermap_api_key
+```
+
+`NEXT_PUBLIC_API_URL` is the base URL of the Express backend and should not have a trailing slash. It is exposed to the browser, so do not put secrets in it. `OPENWEATHER_API_KEY` is used only by the Next.js weather route and should remain server-side.
+
+Start the development server:
+
+```powershell
+npm run dev
+```
+
+Open [http://localhost:3000](http://localhost:3000).
+
+The frontend `.gitignore` excludes `.env*`, including `.env.local`. On a hosting provider, configure these variables in the site's environment settings and redeploy after changing them.
+
+## Scripts
+
+| Command | Description |
+| --- | --- |
+| `npm run dev` | Start the Next.js development server. |
+| `npm run lint` | Run ESLint. |
+| `npm run build` | Create an optimized production build. |
+| `npm run start` | Serve the production build; run `npm run build` first. |
+
+## Routes
+
+| Route | Purpose |
+| --- | --- |
+| `/` | Login |
+| `/mainPage` | Feed and weather |
+| `/mainPage/[userId]` | User profile |
+| `/mainPage/Search` | Search users |
+| `/mainPage/direct` | Direct messages |
+| `/mainPage/accounts/emailsignup` | Create an account |
+| `/mainPage/accounts/edit` | Edit the signed-in profile |
+| `/mainPage/accounts/password/reset` | Password reset |
+
+## Project structure
+
+```text
+src/app/
+├── api/                 # Frontend API clients and Next.js weather routes
+├── components/          # Shared UI, feed, dialogs, notifications, and weather
+├── Context/             # Authentication, socket, dialogs, and shared state
+├── hooks/               # Shared React hooks
+├── mainPage/            # Feed, profile, search, messaging, and account pages
+├── Reducer/             # Profile and application state reducers
+├── styles/              # Application and page styles
+├── layout.tsx            # Root layout and providers
+└── page.tsx              # Login route
+```
+
+## Backend and deployment
+
+The browser calls the Express API using `NEXT_PUBLIC_API_URL`. The backend must allow the frontend origin through `FRONTEND_ORIGIN` and credentialed CORS. Authentication uses cookies, and real-time messaging uses Socket.IO at the same backend URL; deploy the backend on a service that supports long-lived HTTP connections and WebSockets.
+
+For production, use HTTPS for both services and configure cookie settings, CORS, and the exact frontend origin for the deployed domains. Keep MongoDB and Cloudinary credentials exclusively in the backend environment. Keep the OpenWeather API key in the frontend host's server-side environment configuration; do not rename it with a `NEXT_PUBLIC_` prefix.
+
+Post images and videos are uploaded through the backend to Cloudinary. Configure Cloudinary credentials in the backend environment, not in this frontend project. The backend's README documents its environment variables and setup.
+
+## Notes
+
+- The frontend has no configured unit-test script. Use `npm run lint` and `npm run build` to check it.
+- Weather city lookup uses Open-Meteo geocoding; current weather is fetched through the Next.js route using `OPENWEATHER_API_KEY`.
+- The frontend API defaults to `http://localhost:3001` when `NEXT_PUBLIC_API_URL` is unset; set it explicitly for deployed environments.

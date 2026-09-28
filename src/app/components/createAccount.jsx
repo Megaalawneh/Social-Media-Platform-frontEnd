@@ -9,10 +9,13 @@ import InputLabel from "@mui/material/InputLabel";
 import MenuItem from "@mui/material/MenuItem";
 import FormControl from "@mui/material/FormControl";
 import Select from "@mui/material/Select";
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import Link from "next/link";
-import { useContext } from "react";
-import { CreateProfile } from "../Context/CreateProfileContext";
+import AuthGuard from "../hooks/AuthGuard";
+import { CreateProfileHandleApi, geocodeCityApi } from "../api/users";
+import { useRouter } from "next/navigation";
+import { AuthGuardContext } from "../Context/AuthGuardContext";
+import { loginApi } from "../api/auth";
 const selectMenuProps = {
   disableScrollLock: true,
   slotProps: {
@@ -42,50 +45,81 @@ const months = [
 ];
 
 export default function CreateAccount() {
+  AuthGuard();
   const [month, setMonth] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [days, setDays] = useState(31);
+  const [inputData, setInputData] = useState({
+    userName: "",
+    userEmail: "",
+    userPassword: "",
+    userBirthDay: "",
+    userBirthMonth: "",
+    userBirthYear: "",
+    userCityName: "",
+    userFullName: "",
+    userProfilePic: "",
+    userBio: "",
+  });
   const goBackHome = "/";
-  const { inputData, setInputData, dispatch } = useContext(CreateProfile);
   const [value, setValue] = useState(true);
-  function CreateProfileHandle(event) {
-    dispatch({ type: event, payload: { inputData } });
-  }
+  const [error, setError] = useState("");
+  const router = useRouter();
+  const { refreshUser, refreshPosts } = useContext(AuthGuardContext);
+  async function CreateProfileHandle() {
+    setIsSubmitting(true);
+    try {
+      const birthMonth = months.indexOf(inputData.userBirthMonth) + 1;
+      const userBirthDate = `${inputData.userBirthYear}-${String(birthMonth).padStart(2, "0")}-${String(inputData.userBirthDay).padStart(2, "0")}`;
+      const userCity = await geocodeCityApi(inputData.userCityName);
+      const data = await CreateProfileHandleApi({
+        ...inputData,
+        userBirthDate,
+        userCity,
+      });
+      await loginApi(data.newUser.userEmail, inputData.userPassword);
 
+      router.push("/mainPage");
+      await refreshUser();
+      await refreshPosts();
+    } catch (error) {
+      const responseData = error?.response?.data;
+      const serverMessage =
+        typeof responseData === "string"
+          ? responseData
+          : responseData?.error ||
+            responseData?.message ||
+            responseData?.error?.message;
+      setError(
+        serverMessage ||
+          (error?.request
+            ? "Cannot reach the account server. Check that the backend is running and its MongoDB Atlas connection is configured."
+            : error?.message || "Something went wrong. Please try again."),
+      );
+    } finally {
+      setIsSubmitting(false);
+    }
+  }
   function handleSubmit(event) {
     event.preventDefault();
-    CreateProfileHandle("createProfile");
+    CreateProfileHandle();
   }
   useEffect(() => {
     function checkDay() {
-      if (month === "January") {
-        setDays(31);
-      } else if (month === "February") {
-        setDays(28);
-      } else if (month === "March") {
-        setDays(31);
-      } else if (month === "April") {
-        setDays(30);
-      } else if (month === "May") {
-        setDays(31);
-      } else if (month === "June") {
-        setDays(30);
-      } else if (month === "July") {
-        setDays(31);
-      } else if (month === "August") {
-        setDays(31);
-      } else if (month === "September") {
-        setDays(30);
-      } else if (month === "October") {
-        setDays(31);
-      } else if (month === "November") {
-        setDays(30);
-      } else if (month === "December") {
-        setDays(31);
+      const monthIndex = months.indexOf(month);
+      const selectedYear = Number(inputData.userBirthYear) || 2000;
+      const updatedDays =
+        monthIndex < 0
+          ? 31
+          : new Date(selectedYear, monthIndex + 1, 0).getDate();
+      setDays(updatedDays);
+      if (Number(inputData.userBirthDay) > updatedDays) {
+        setInputData((previous) => ({ ...previous, userBirthDay: "" }));
       }
     }
 
     checkDay();
-  }, [month]);
+  }, [month, inputData.userBirthYear, inputData.userBirthDay]);
   useEffect(() => {
     function validinputData() {
       const validFullName = /^[A-Za-z]/.test(inputData.userFullName);
@@ -94,11 +128,27 @@ export default function CreateAccount() {
         /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$%]).{8,}$/.test(
           inputData.userPassword,
         );
+      const birthMonth = months.indexOf(inputData.userBirthMonth);
+      const birthDate =
+        birthMonth >= 0 &&
+        inputData.userBirthDay &&
+        inputData.userBirthYear
+          ? new Date(
+              Number(inputData.userBirthYear),
+              birthMonth,
+              Number(inputData.userBirthDay),
+            )
+          : null;
+      const validBirthDate =
+        birthDate instanceof Date &&
+        birthDate.getFullYear() === Number(inputData.userBirthYear) &&
+        birthDate.getMonth() === birthMonth &&
+        birthDate.getDate() === Number(inputData.userBirthDay) &&
+        birthDate <= new Date();
       if (
         inputData.userName.length >= 6 &&
-        inputData.userBirthDay !== "" &&
-        inputData.userBirthMonth !== "" &&
-        inputData.userBirthYear !== "" &&
+        validBirthDate &&
+        inputData.userCityName.trim() !== "" &&
         inputData.userFullName !== "" &&
         validFullName &&
         validUserName &&
@@ -142,11 +192,22 @@ export default function CreateAccount() {
               variant="h6"
               style={{ marginTop: "15px", marginLeft: "15px" }}
             >
-              email address or username
+              email address{" "}
+              {error === "" ? null : (
+                <span
+                  style={{
+                    marginTop: "15px",
+                    marginLeft: "15px",
+                    color: "red",
+                  }}
+                >
+                  {error}
+                </span>
+              )}
             </Typography>
             <CustomTextFields
               id={"outlined-required"}
-              label={"email address or username"}
+              label={"email address"}
               variant={"outlined"}
               type={"email"}
               required={true}
@@ -170,7 +231,9 @@ export default function CreateAccount() {
               label={"Password"}
               type={"password"}
               required={true}
-              placeholder={"password must be 8 characters and 1 uppercase letter and 1 lowercase letter and @ $ %"}
+              placeholder={
+                "password must be 8 characters and 1 uppercase letter and 1 lowercase letter and @ $ %"
+              }
               value={inputData.userPassword || ""}
               onChange={(e) => {
                 setInputData((prev) => ({
@@ -259,16 +322,40 @@ export default function CreateAccount() {
                   MenuProps={selectMenuProps}
                   required
                 >
-                  {Array.from({ length: 2030 - 1900 + 1 }, (_, i) => (
+                  {Array.from(
+                    { length: new Date().getFullYear() - 1900 + 1 },
+                    (_, i) => (
                     <MenuItem key={i + 1900} value={i + 1900}>
                       {i + 1900}
                     </MenuItem>
-                  ))}
+                    ),
+                  )}
                 </Select>
               </FormControl>
             </div>
 
             {/* Selecter */}
+            <Typography
+              gutterBottom
+              variant="h6"
+              style={{ marginTop: "12px", marginLeft: "15px" }}
+            >
+              City
+            </Typography>
+            <CustomTextFields
+              id="user-city"
+              label="City"
+              type="text"
+              required
+              value={inputData.userCityName}
+              onChange={(event) =>
+                setInputData((previous) => ({
+                  ...previous,
+                  userCityName: event.target.value,
+                }))
+              }
+              placeholder="Enter your city"
+            />
             <Typography
               gutterBottom
               variant="h6"
@@ -313,7 +400,7 @@ export default function CreateAccount() {
               variant={"contained"}
               className={"btn"}
               type={"submit"}
-              disabled={value}
+              disabled={value || isSubmitting}
             />
           </div>
         </form>

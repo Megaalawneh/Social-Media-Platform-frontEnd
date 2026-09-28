@@ -1,17 +1,39 @@
 "use client";
-import { createContext, useState } from "react";
+import { createContext, useCallback, useState } from "react";
 import NotificationsDrawer from "../components/NotificationsDrawer";
+import { SocketProvider } from "./SocketContext";
+import { CommentDialogProvider } from "./commentDialogContext";
 export const NotificationsDrawerContext = createContext([]);
+
 export const NotificationsDrawerProvider = ({ children }) => {
   const [open, setOpen] = useState(false);
+  const [hasUnreadNotifications, setHasUnreadNotifications] = useState(false);
 
-  const toggleDrawer = (newOpen) => () => {
+  const markNewNotification = useCallback(() => {
+    setHasUnreadNotifications(true);
+  }, []);
+
+  const toggleDrawer = useCallback((newOpen) => {
     setOpen(newOpen);
-  };
+    if (newOpen) {
+      setHasUnreadNotifications(false);
+    }
+  }, []);
   return (
-    <NotificationsDrawerContext.Provider value={{ open, toggleDrawer }}>
-      <NotificationsDrawer />
-      {children}
+    <NotificationsDrawerContext.Provider
+      value={{
+        open,
+        toggleDrawer,
+        hasUnreadNotifications,
+        markNewNotification,
+      }}
+    >
+      <CommentDialogProvider>
+        <SocketProvider>
+          <NotificationsDrawer />
+          {children}
+        </SocketProvider>
+      </CommentDialogProvider>
     </NotificationsDrawerContext.Provider>
   );
 };

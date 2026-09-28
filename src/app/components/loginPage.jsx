@@ -8,36 +8,45 @@ import "../styles/loginPageStyle.css";
 import Link from "next/link";
 import Mybutton from "./myButton";
 import CustomTextFields from "./customTextField";
-import { CreateProfile } from "../Context/CreateProfileContext";
-import { useContext, useState } from "react";
+import { useState, useContext } from "react";
+import { useRouter } from "next/navigation";
+import { AuthGuardContext } from "../Context/AuthGuardContext";
+import AuthGuard from "../hooks/AuthGuard";
+import { loginApi } from "../api/auth";
 export default function LoginPage() {
-  const { users } = useContext(CreateProfile);
+  AuthGuard();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [erorrLogin, setErorrLogin] = useState(null);
-  function handleSubmit(event) {
+  const { refreshUser, refreshPosts } = useContext(AuthGuardContext);
+  const router = useRouter();
+  async function handleSubmit(event) {
     event.preventDefault();
-    const findUser = users.find(
-      (u) => u.userEmail === email && u.userPassword === password
-    );
-    if(findUser){
-      console.log(findUser,"hi")
-      setErorrLogin(null)
-    }else{
-       setErorrLogin(
-          <Typography
-            gutterBottom
-            variant="h6"
-            style={{
-              display: "flex",
-              color: "red",
-              width: "100%",
-              marginLeft: "60px",
-            }}
-          >
-            The Email Or The Password Is Incorrect
-          </Typography>,
-        );
+    try {
+      const response = await loginApi(email, password);
+
+      if (response == "done") {
+        router.push("/mainPage");
+        await refreshUser();
+        await refreshPosts();
+      }
+    } catch (error) {
+      console.log(error);
+
+      setErorrLogin(
+        <Typography
+          gutterBottom
+          variant="h6"
+          style={{
+            display: "flex",
+            color: "red",
+            width: "100%",
+            marginLeft: "60px",
+          }}
+        >
+          The Email Or The Password Is Incorrect
+        </Typography>,
+      );
     }
   }
   return (

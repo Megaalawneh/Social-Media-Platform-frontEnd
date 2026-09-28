@@ -20,10 +20,10 @@ export const AlertDialogProvider = ({ children }) => {
   const handleOpen = () => {
     setOpen(true);
   };
- 
+
 
   return (
-    <alertDialogContext.Provider value={{ info,open,handleClose, handleOpen, setInfo ,}}>
+    <alertDialogContext.Provider value={{ info,open,handleClose, handleOpen, setInfo }}>
       <AlertDialog/>
       {children}
     </alertDialogContext.Provider>

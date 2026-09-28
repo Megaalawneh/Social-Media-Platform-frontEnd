@@ -50,8 +50,11 @@
   display: grid;
   grid-template-columns: repeat(4, 1fr);
   gap: 2px;
-  width: 100%;
+  width: 90%;
+  margin-left: 22px;
+  
 }
+
 
 .postPic {
   width: 100%;

@@ -13,8 +13,8 @@ import IconButton from "@mui/material/IconButton";
 import CloseIcon from "@mui/icons-material/Close";
 import PermMediaIcon from "@mui/icons-material/PermMedia";
 import { styled } from "@mui/material/styles";
-import { CreateProfile } from "../Context/CreateProfileContext";
-
+import { AuthGuardContext } from "../Context/AuthGuardContext";
+import { handleSharePostApi } from "../api/posts";
 const VisuallyHiddenInput = styled("input")({
   clip: "rect(0 0 0 0)",
   clipPath: "inset(50%)",
@@ -29,15 +29,35 @@ const VisuallyHiddenInput = styled("input")({
 
 function SimpleDialog({ onClose, selectedValue, open }) {
   const [caption, setCaption] = useState("");
+  const [selectedFile, setSelectedFile] = useState(null);
   const [previewUrl, setPreviewUrl] = useState("");
   const [mediaType, setMediaType] = useState("");
   const [uploadError, setUploadError] = useState("");
-  const { dispatch ,User} = useContext(CreateProfile);
+  const [isUploading, setIsUploading] = useState(false);
+  const { currentUser, refreshPosts } = useContext(AuthGuardContext);
 
+  const getUploadErrorMessage = (error) => {
+    const responseData = error?.response?.data;
+    const serverMessage =
+      typeof responseData === "string"
+        ? responseData
+        : responseData?.message || responseData?.error?.message;
+
+    if (serverMessage) return serverMessage;
+    if (error?.response?.status) {
+      return `Upload failed with server status ${error.response.status}. Please try again.`;
+    }
+    if (error?.request) {
+      return "Could not reach the server. Check that the backend is running and try again.";
+    }
+
+    return error?.message || "Failed to upload post. Please try again.";
+  };
 
   const discardMedia = () => {
     if (previewUrl) URL.revokeObjectURL(previewUrl);
 
+    setSelectedFile(null);
     setPreviewUrl("");
     setMediaType("");
     setUploadError("");
@@ -62,23 +82,38 @@ function SimpleDialog({ onClose, selectedValue, open }) {
 
     if (previewUrl) URL.revokeObjectURL(previewUrl);
 
+    setSelectedFile(file);
     setPreviewUrl(URL.createObjectURL(file));
     setMediaType(file.type.startsWith("video/") ? "video" : "image");
     setUploadError("");
   };
 
-  const handleShare = () => {
-    if (!previewUrl || !User?.userId) return;
+  const handleShare = async () => {
+    if (!selectedFile) return;
 
-    dispatch({
-      type: "post",
-      payload: { previewUrl, caption, User, mediaType },
-    });
+    try {
+      setIsUploading(true);
+      const formData = new FormData();
+      formData.append("media", selectedFile);
+      formData.append("caption", caption);
+      formData.append("mediaType", mediaType);
 
-    setPreviewUrl("");
-    setMediaType("");
-    setCaption("");
-    onClose(selectedValue);
+      await handleSharePostApi(formData);
+
+      discardMedia();
+      setCaption("");
+      onClose(selectedValue);
+
+      if (refreshPosts) refreshPosts();
+    } catch (error) {
+      const message = getUploadErrorMessage(error);
+      console.error(
+        `Upload error (${error?.response?.status || error?.code || "unknown"}): ${message}`,
+      );
+      setUploadError(message);
+    } finally {
+      setIsUploading(false);
+    }
   };
 
   return (
@@ -129,7 +164,7 @@ function SimpleDialog({ onClose, selectedValue, open }) {
               Upload file
               <VisuallyHiddenInput
                 type="file"
-                accept="image/*,video/*"
+                accept=".jpg,.jpeg,.png,.gif,.webp,.mp4,.webm,.mov"
                 onChange={handleFileChange}
               />
             </Button>
@@ -184,7 +219,7 @@ function SimpleDialog({ onClose, selectedValue, open }) {
 
       <DialogActions sx={{ px: 3, pb: 2, justifyContent: "space-between" }}>
         {previewUrl ? (
-          <Button color="inherit" onClick={discardMedia}>
+          <Button color="inherit" onClick={discardMedia} disabled={isUploading}>
             Choose another file
           </Button>
         ) : (
@@ -195,9 +230,9 @@ function SimpleDialog({ onClose, selectedValue, open }) {
           variant="contained"
           color="primary"
           onClick={handleShare}
-          disabled={!previewUrl || !User?.userId}
+          disabled={!selectedFile || !currentUser?._id || isUploading}
         >
-          Share
+          {isUploading ? "Uploading..." : "Share"}
         </Button>
       </DialogActions>
     </Dialog>

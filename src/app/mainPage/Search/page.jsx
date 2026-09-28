@@ -1,40 +1,45 @@
 "use client";
-import React, { useContext, useState,useEffect } from "react";
+import React, { useRef, useState } from "react";
 import TextField from "@mui/material/TextField";
 import InputAdornment from "@mui/material/InputAdornment";
 import SearchIcon from "@mui/icons-material/Search";
 import { Avatar, Box, Stack, Typography } from "@mui/material";
 import "../../styles/mainPageStyle.css";
 import PageLayout from "../../components/PageLayout";
-import {
-
-  CreateProfile,
-} from "../../Context/CreateProfileContext";
 import { AlertDialogProvider } from "../../Context/alertDialogContext";
 import Link from "next/link";
+import { searchUserNameApi } from "../../api/users";
 function SearchContent() {
   const [inputData, setInputData] = useState("");
-  const { state, dispatch } = useContext(CreateProfile);
-  const results = state.Search ?? [];
-  function handleSearch(value) {
+  const [results, setResults] = useState([]);
+  const searchRequestId = useRef(0);
+
+  async function handleSearch(value) {
     setInputData(value);
-    dispatch({
-      type: "SearchProfile",
-      payload: { inputData: value },
-    });
-  }
-  const [isMounted, setIsMounted] = useState(false);
-
-  useEffect(() => {
-    function moun() {
-      setIsMounted(true);
+    const requestId = ++searchRequestId.current;
+    const searchTerm = value.trim();
+    if (!searchTerm) {
+      setResults([]);
+      return;
     }
-    moun();
-  }, []);
 
-  if (!isMounted) {
-    return null;
+    try {
+      const res = await searchUserNameApi(searchTerm);
+      if (requestId === searchRequestId.current) {
+        setResults(res);
+      }
+    } catch (error) {
+      if (requestId === searchRequestId.current) {
+        setResults([]);
+        console.error(
+          "User search failed:",
+          error.response?.status,
+          error.response?.data || error.message,
+        );
+      }
+    }
   }
+
   return (
     <div className="searchContainer">
       <TextField
@@ -56,7 +61,7 @@ function SearchContent() {
       <Box sx={{ width: "100%", maxWidth: 400 }}>
         {results ? (
           results.map((user) => (
-            <Link key={user.userId} href={`/mainPage/${user.userName}`}>
+            <Link key={user._id} href={`/mainPage/${user.userName}`}>
               <Stack
                 direction="row"
                 spacing={2}
@@ -89,12 +94,10 @@ function SearchContent() {
 
 export default function Page() {
   return (
-  
-      <AlertDialogProvider>
-        <PageLayout>
-          <SearchContent />
-        </PageLayout>
-      </AlertDialogProvider>
-
+    <AlertDialogProvider>
+      <PageLayout>
+        <SearchContent />
+      </PageLayout>
+    </AlertDialogProvider>
   );
 }

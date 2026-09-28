@@ -1,34 +1,10 @@
 "use client";
 import { v4 as uuidv4 } from "uuid";
+
 import moment from "moment";
 
 export default function CreateProfileReducer(state, action) {
   switch (action.type) {
-    case "createProfile": {
-      const { inputData } = action.payload || {};
-
-      if (!inputData) return state;
-
-      const newUser = {
-        userId: uuidv4(),
-        userName: inputData.userName,
-        userEmail: inputData.userEmail,
-        userPassword: inputData.userPassword,
-        userBirthDay: inputData.userBirthDay,
-        userBirthMonth: inputData.userBirthMonth,
-        userBirthYear: inputData.userBirthYear,
-        userFullName: inputData.userFullName,
-        userProfilePic: inputData.userProfilePic,
-        userBio: "",
-        followers: [],
-        following: [],
-        pending: [],
-        Notifications: [],
-      };
-
-      return { ...state, users: [...state.users, newUser] };
-    }
-
     case "editProfile": {
       const { inputEdit } = action.payload || {};
 
@@ -185,80 +161,9 @@ export default function CreateProfileReducer(state, action) {
         }),
       };
     }
-    case "followUser": {
-      const { userFollower, userFollowing } = action.payload || {};
+   
 
-      return {
-        ...state,
-        users: state.users.map((p) => {
-          if (p.userId === userFollower) {
-            const alreadyPending = p?.pending?.some(
-              (item) => item.userFollowing === userFollowing,
-            );
-
-            if (alreadyPending) return p;
-
-            return {
-              ...p,
-              pending: [...p.pending, { userFollower, userFollowing }],
-            };
-          }
-
-          if (p.userId === userFollowing) {
-            const notificationExists = p?.Notifications?.some(
-              (item) =>
-                item.userFollower === userFollower &&
-                item.type === "follow_request",
-            );
-
-            if (notificationExists) return p;
-
-            return {
-              ...p,
-              Notifications: [
-                ...p.Notifications,
-                {
-                  userFollower,
-                  type: "follow_request",
-                  message: "requested to follow you!",
-                },
-              ],
-            };
-          }
-
-          return p;
-        }),
-      };
-    }
-
-    case "unfollowUser": {
-      const { userFollower, userFollowing } = action.payload || {};
-      return {
-        ...state,
-        users: state.users.map((p) => {
-          if (p.userId === userFollower) {
-            return {
-              ...p,
-              pending: p.pending.filter((p) =>
-                p.userFollower === userFollower &&
-                p.userFollowing === userFollowing
-                  ? false
-                  : p,
-              ),
-            };
-          }
-          if (p.userId === userFollowing) {
-            return {
-              ...p,
-              Notifications: p.Notifications.filter((p) =>
-                p.userFollower === userFollower ? false : p,
-              ),
-            };
-          }
-          return p;
-        }),
-      };
-    }
+   
     case "ConfirmFollow": {
       const { userId, userFollower } = action.payload || {};
 
@@ -274,16 +179,18 @@ export default function CreateProfileReducer(state, action) {
 
             return {
               ...u,
-              followers: [...u.followers, { userFollower }], Notifications: u.Notifications.filter((p) =>
+              followers: [...u.followers, { userFollower }],
+              Notifications: u.Notifications.filter((p) =>
                 p.userFollower === userFollower ? false : p,
               ),
             };
           }
-        
+
           if (u.userId === userFollower) {
             return {
-              ...u,following: [...u.following, { userId }]
-              ,pending: u.pending.filter(
+              ...u,
+              following: [...u.following, { userfollowing: userId }],
+              pending: u.pending.filter(
                 (p) =>
                   !(
                     p.userFollower === userFollower &&
