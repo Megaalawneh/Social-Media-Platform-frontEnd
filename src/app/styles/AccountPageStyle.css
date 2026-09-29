@@ -52,7 +52,6 @@
   gap: 2px;
   width: 90%;
   margin-left: 22px;
-  
 }
 
 
@@ -65,6 +64,127 @@
   height: 380px;
   object-fit: cover;
 }
-.MuiContainer-root {
-  padding: 0 !important;
+
+@media (max-width: 1024px) {
+  .profileAvatar,
+  .profileBtn {
+    margin-left: 32px;
+  }
+
+  .profileAvatar {
+    width: calc(100% - 64px);
+    margin-top: 44px;
+  }
+
+  .profileBtn {
+    width: calc(100% - 64px);
+  }
+
+  .profileBtn .MuiButton-root {
+    width: min(550px, 100%) !important;
+    margin-left: 0 !important;
+  }
+
+  .profilePosts {
+    width: calc(100% - 44px);
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .postPic img {
+    height: auto;
+    aspect-ratio: 1;
+  }
+}
+
+@media (max-width: 760px) {
+  .accountContainer {
+    height: auto;
+    min-height: 100dvh;
+    max-height: none;
+    overflow: visible;
+    padding-bottom: calc(76px + env(safe-area-inset-bottom));
+  }
+
+  .profile {
+    min-height: 0;
+  }
+
+  .profileAvatar {
+    width: auto;
+    height: auto;
+    min-height: 0;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 16px;
+    margin: 24px 16px 0;
+  }
+
+  .profileAvatar > .MuiAvatar-root {
+    width: clamp(84px, 25vw, 120px);
+    height: clamp(84px, 25vw, 120px);
+    flex-shrink: 0;
+  }
+
+  .profileInfo {
+    min-width: 0;
+    flex: 1 1 180px;
+    margin-left: 0;
+  }
+
+  .profileFollow {
+    flex-wrap: wrap;
+    gap: 0 8px;
+  }
+
+  .profileFollow .MuiTypography-root {
+    margin-right: 4px !important;
+    font-size: 0.875rem;
+  }
+
+  .profileBio {
+    overflow-wrap: anywhere;
+  }
+
+  .profileBtn {
+    width: auto;
+    height: auto;
+    margin: 18px 16px;
+  }
+
+  .profileBtn > div {
+    width: 100%;
+  }
+
+  .profileBtn .MuiButton-root {
+    width: 100% !important;
+    min-height: 42px;
+    margin-left: 0 !important;
+  }
+
+  .profilePosts {
+    width: 100%;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 2px;
+    margin: 0;
+  }
+
+  .postPic img {
+    display: block;
+    width: 100%;
+    height: auto;
+    aspect-ratio: 1;
+    object-fit: cover;
+  }
+}
+
+@media (max-width: 420px) {
+  .profileAvatar {
+    gap: 12px;
+    margin-right: 12px;
+    margin-left: 12px;
+  }
+
+  .profilePosts {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
 }

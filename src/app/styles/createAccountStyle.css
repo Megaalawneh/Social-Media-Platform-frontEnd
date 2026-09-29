@@ -31,5 +31,33 @@
 @media (max-width: 600px) {
   .SelecterDiv {
     flex-direction: column;
+    gap: 10px;
+  }
+
+  .SelecterDiv .MuiFormControl-root {
+    min-width: 0;
+    max-width: none;
+  }
+
+  .createAccountContainer > form {
+    width: 100%;
+    max-width: 700px;
+    margin-top: 12px !important;
+    padding: 0 12px calc(24px + env(safe-area-inset-bottom));
+  }
+
+  .createAccountCardInfo > .MuiTypography-root {
+    margin-right: 8px !important;
+    margin-left: 8px !important;
+    overflow-wrap: anywhere;
+  }
+
+  .createAccountCardInfo > .MuiTypography-h5 {
+    font-size: 1.3rem;
+  }
+
+  .createAccountCardInfo > .MuiTypography-h6 {
+    flex-wrap: wrap;
+    font-size: 1rem;
   }
 }

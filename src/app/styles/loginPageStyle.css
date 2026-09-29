@@ -52,3 +52,57 @@ body{
 .MuiPaper-root{
   background-Color:rgb(35, 34, 34) !important;
 }
+
+@media (max-width: 760px) {
+  .loginPageContainer {
+    min-height: 100dvh;
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+    padding: 12px !important;
+  }
+
+  .loginPageContainer > .MuiCard-root {
+    width: 100% !important;
+    max-width: 560px;
+  }
+
+  .loginPageContainer > .LoginCard {
+    order: -1;
+  }
+
+  .loginPageContainer > .MuiCard-root:first-child > div {
+    min-height: 0 !important;
+    padding: 16px !important;
+  }
+
+  .loginPageContainer > .MuiCard-root:last-child {
+    min-height: 0;
+    padding: 20px 16px;
+  }
+
+  .LoginCard > .MuiTypography-root {
+    justify-content: center !important;
+    margin: 0 0 16px !important;
+    text-align: center;
+  }
+
+  .loginPageCardInfo {
+    width: 100%;
+  }
+
+  .loginPageCardInfo .MuiTypography-root {
+    margin-left: 0 !important;
+  }
+
+  .passwordbtn {
+    margin-left: 0 !important;
+  }
+
+  .btn,
+  .btnCreate,
+  .btnForgottenPassword {
+    min-height: 44px;
+    margin: 6px 0 !important;
+  }
+}
