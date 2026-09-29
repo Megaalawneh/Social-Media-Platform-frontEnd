@@ -501,125 +501,71 @@
   }
 }
 
-.notificationsPopoverRoot {
-  z-index: 1300;
-}
-
-.notificationsPopoverPaper {
-  position: relative;
-  width: min(420px, calc(100vw - 24px));
-  max-height: min(70vh, 560px);
-  overflow: auto;
-  color: white !important;
-  background: rgb(35, 34, 34) !important;
-  border: 1px solid rgb(68, 66, 66);
-  border-radius: 14px !important;
-  box-shadow: 0 12px 36px rgba(0, 0, 0, 0.38) !important;
-}
-
-.notificationsPanel {
-  width: 100%;
-}
-
-.notificationsHeader {
-  position: sticky;
-  top: 0;
-  z-index: 1;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 10px 14px;
-  background: rgb(35, 34, 34);
-  border-bottom: 1px solid rgb(68, 66, 66);
-}
-
-.notificationsCloseButton {
-  color: white !important;
-}
-
 .notificationsEmptyState {
   display: flex;
-  min-height: 210px;
-  flex-direction: column;
-  align-items: center;
+  min-height: 96px;
   justify-content: center;
-  gap: 8px;
-  padding: 24px;
+  padding: 20px;
   color: rgb(190, 190, 190);
   text-align: center;
 }
 
-.notificationsEmptyState > .MuiSvgIcon-root {
-  color: #9ca3af;
-  font-size: 42px;
-}
-
-.notificationsEmptyState .MuiTypography-subtitle1 {
-  color: white;
-  font-weight: 600;
-}
-
-.notificationsList {
-  display: flex;
-  flex-direction: column;
-}
-
-.notificationItem {
-  display: grid;
-  grid-template-columns: 40px minmax(0, 1fr);
-  align-items: start;
-  gap: 10px;
-  padding: 12px 14px;
-  border-bottom: 1px solid rgb(68, 66, 66);
-}
-
-.notificationItem:last-child {
-  border-bottom: 0;
-}
-
-.notificationMessage {
-  min-width: 0;
-  overflow-wrap: anywhere;
-}
-
-.notificationMessage .MuiTypography-body2 {
-  color: white;
-}
-
-.notificationActions {
-  display: flex;
-  grid-column: 2;
-  gap: 8px;
-}
-
-.notificationActions .MuiButton-root {
-  min-width: 72px;
-  min-height: 34px;
-  padding: 4px 10px;
-  font-size: 0.75rem;
-}
-
-.notificationActions .MuiButton-root:last-child {
-  background-color: #25292e;
-}
-
 @media (max-width: 760px) {
-  .notificationsPopoverRoot {
+  .notificationsDrawer .notificationsDrawerPaper {
     position: fixed !important;
     top: auto !important;
-    right: 12px !important;
+    right: auto !important;
     bottom: calc(72px + env(safe-area-inset-bottom)) !important;
     left: 12px !important;
-    width: auto !important;
-    max-width: 420px;
-    z-index: 1300;
-    margin: 0 auto;
-    transform: none !important;
+    width: min(450px, calc(100vw - 24px)) !important;
+    height: auto !important;
+    max-height: min(65dvh, 520px);
+    overflow-x: hidden;
+    overflow-y: auto;
+    box-sizing: border-box;
+    border: 1px solid rgb(68, 66, 66);
+    border-radius: 14px;
+    background: rgb(35, 34, 34);
   }
 
-  .notificationsPopoverPaper {
-    position: relative;
-    width: 100%;
-    max-height: min(65dvh, 520px);
+  .notificationsDrawer .MuiBackdrop-root {
+    background-color: rgba(0, 0, 0, 0.18);
+  }
+
+  .notificationsDrawerContent {
+    width: 100% !important;
+    box-sizing: border-box;
+  }
+
+  .notificationRow {
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 4px 8px;
+    margin: 12px 10px !important;
+  }
+
+  .notificationRow > a,
+  .notificationRow > .MuiStack-root {
+    max-width: 100%;
+  }
+
+  .notificationRowMessage {
+    min-width: 0;
+    flex: 1 1 150px;
+    overflow-wrap: anywhere;
+    margin: 4px 0 !important;
+  }
+
+  .notificationRow .notificationActionButton {
+    margin: 2px 0 !important;
+  }
+
+  .notificationRow .notificationActionButton:first-of-type {
+    margin-left: 48px !important;
+  }
+
+  .notificationsEmptyState {
+    min-height: 84px;
+    padding: 16px;
   }
 }

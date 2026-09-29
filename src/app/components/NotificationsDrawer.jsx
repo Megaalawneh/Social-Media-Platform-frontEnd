@@ -1,11 +1,8 @@
 import Box from "@mui/material/Box";
-import ClickAwayListener from "@mui/material/ClickAwayListener";
-import Popper from "@mui/material/Popper";
+import Drawer from "@mui/material/Drawer";
 import { useContext, useEffect, useState, useMemo } from "react";
 import { NotificationsDrawerContext } from "../Context/NotificationsDrawerContext";
-import { Typography, Button, IconButton } from "@mui/material";
-import CloseIcon from "@mui/icons-material/Close";
-import NotificationsNoneIcon from "@mui/icons-material/NotificationsNone";
+import { Typography, Button } from "@mui/material";
 import "../styles/loginPageStyle.css";
 import { useSocket } from "../Context/SocketContext";
 import { AuthGuardContext } from "../Context/AuthGuardContext";
@@ -17,22 +14,14 @@ import { getUserByIdApi } from "../api/users";
 import C_Avatar from "./C_Avatar";
 import { CommentDialogContext } from "../Context/commentDialogContext";
 export default function NotificationsDrawer() {
-  const { open, anchorEl, toggleDrawer, markNewNotification } = useContext(NotificationsDrawerContext);
+  const { open, toggleDrawer, markNewNotification } = useContext(
+    NotificationsDrawerContext,
+  );
   const { socket } = useSocket();
   const { currentUser, refreshUser } = useContext(AuthGuardContext);
   const [authors, setAuthors] = useState({});
   const { handleClickOpen, setPostId } = useContext(CommentDialogContext);
 
-  useEffect(() => {
-    if (!open) return undefined;
-
-    function handleKeyDown(event) {
-      if (event.key === "Escape") toggleDrawer(false);
-    }
-
-    document.addEventListener("keydown", handleKeyDown);
-    return () => document.removeEventListener("keydown", handleKeyDown);
-  }, [open, toggleDrawer]);
   async function handleConfirmNotification(userFollower) {
     try {
       await handleConfirmNotificationApi(userFollower);
@@ -82,13 +71,6 @@ export default function NotificationsDrawer() {
       Boolean,
     );
   }, [currentUser?.Notifications, currentUser?.comments]);
-  const notifications = useMemo(
-    () =>
-      (currentUser?.Notifications || []).filter((notification) =>
-        ["follow", "comment", "like"].includes(notification?.type),
-      ),
-    [currentUser?.Notifications],
-  );
 
   useEffect(() => {
     async function fetchAuthors() {
@@ -140,131 +122,173 @@ export default function NotificationsDrawer() {
     }
     return `${Math.round(elapsed / msPerDay)}d ago`;
   }
-  function getNotificationDescription(type) {
-    if (type === "follow") return "requested to follow you";
-    if (type === "comment") return "commented on your post";
-    return "liked your post";
-  }
+  const followNotifications = (
+    <Box className="notificationsDrawerContent" sx={{ width: 450 }} role="presentation">
+      {currentUser?.Notifications?.map((n, index) => {
+        if (n?.type !== "follow") return null;
+        const author = authors[n?.userId];
+        const authorProfilePic = author ? author.userProfilePic : undefined;
+        const authorName = author ? author.userName : "Unknown User";
+        return (
+          <div
+            key={n?._id || `${n?.userId}-${index}`}
+            className="notificationRow"
+            style={{ display: "flex", margin: "15px 0px 10px 10px " }}
+            onClick={() => toggleDrawer(false)}
+          >
+            <C_Avatar
+              authorName={authorName}
+              authorProfilePic={authorProfilePic}
+              LinkTogo={`/mainPage/${author?.userName}`}
+            />
+            <div className="notificationRowMessage" style={{ marginLeft: "10px", marginTop: "5px" }}>
+              <Typography variant="caption" sx={{ color: "white" }}>
+                Follow request sent
+              </Typography>{" "}
+              <Typography variant="caption" className="timestamp" sx={{ ml: 0 }}>
+                {n?.createdAt ? formatRelativeTime(n?.createdAt) : "Just now"}
+              </Typography>
+            </div>
+            <Button
+              variant="contained"
+              className="notificationActionButton"
+              sx={{
+                margin: "10px 5px 0px 40px",
+                width: "70px",
+                height: "30px",
+                fontSize: "11px",
+              }}
+              onClick={(event) => {
+                event.stopPropagation();
+                handleConfirmNotification(n?.userId);
+              }}
+            >
+              Confirm
+            </Button>
+            <Button
+              variant="contained"
+              className="notificationActionButton"
+              sx={{
+                margin: "10px 5px 0px 0px",
+                width: "70px",
+                height: "30px",
+                fontSize: "11px",
+                backgroundColor: "#25292e",
+              }}
+              onClick={(event) => {
+                event.stopPropagation();
+                handleDeleteNotification(n?.userId);
+              }}
+            >
+              Delete
+            </Button>
+          </div>
+        );
+      })}
+    </Box>
+  );
+  const commentNotifications = (
+    <Box className="notificationsDrawerContent" sx={{ width: 450 }} role="presentation">
+      {currentUser?.Notifications?.map((n, index) => {
+        if (n?.type !== "comment") return null;
+        const author = authors[n.userId];
+        const authorProfilePic = author ? author.userProfilePic : undefined;
+        const authorName = author ? author.userName : "Unknown User";
+        return (
+          <div
+            key={n?._id || `${n?.userId}-${index}`}
+            className="notificationRow"
+            style={{ display: "flex", margin: "15px 0px 10px 10px" }}
+            onClick={() => toggleDrawer(false)}
+          >
+            <C_Avatar
+              authorName={authorName}
+              authorProfilePic={authorProfilePic}
+              LinkTogo={`/mainPage/${author?.userName}`}
+            />
+            <div
+              className="notificationRowMessage"
+              style={{ marginLeft: "10px", marginTop: "5px" }}
+              onClick={() => {
+                setPostId(n.postId);
+                handleClickOpen();
+              }}
+            >
+              <Typography variant="caption" sx={{ color: "white" }}>
+                Comment on your post
+              </Typography>{" "}
+              <Typography variant="caption" className="timestamp" sx={{ ml: 0 }}>
+                {n?.createdAt ? formatRelativeTime(n?.createdAt) : "Just now"}
+              </Typography>
+            </div>
+          </div>
+        );
+      })}
+    </Box>
+  );
+  const likeNotifications = (
+    <Box className="notificationsDrawerContent" sx={{ width: 450 }} role="presentation">
+      {currentUser?.Notifications?.map((n, index) => {
+        if (n?.type !== "like") return null;
+        const author = authors[n.userId];
+        const authorProfilePic = author ? author.userProfilePic : undefined;
+        const authorName = author ? author.userName : "Unknown User";
+        return (
+          <div
+            key={n?._id || `${n?.userId}-${index}`}
+            className="notificationRow"
+            style={{ display: "flex", margin: "15px 0px 10px 10px" }}
+          >
+            <C_Avatar
+              authorName={authorName}
+              authorProfilePic={authorProfilePic}
+              LinkTogo={`/mainPage/${author?.userName}`}
+              onClick={() => toggleDrawer(false)}
+            />
+            <div
+              className="notificationRowMessage"
+              style={{ marginLeft: "10px", marginTop: "5px" }}
+              onClick={() => {
+                setPostId(n.postId);
+                toggleDrawer(false);
+                handleClickOpen();
+              }}
+            >
+              <Typography variant="caption" sx={{ color: "white" }}>
+                liked your Post
+              </Typography>{" "}
+              <Typography variant="caption" className="timestamp" sx={{ ml: 0 }}>
+                {n?.createdAt ? formatRelativeTime(n?.createdAt) : "Just now"}
+              </Typography>
+            </div>
+          </div>
+        );
+      })}
+    </Box>
+  );
+  const hasNotifications = (currentUser?.Notifications || []).some((n) =>
+    ["follow", "comment", "like"].includes(n?.type),
+  );
 
   return (
-    <ClickAwayListener onClickAway={() => open && toggleDrawer(false)}>
-      <Popper
-        className="notificationsPopoverRoot"
-        open={open && Boolean(anchorEl)}
-        anchorEl={anchorEl}
-        placement="right-start"
-        modifiers={[
-          { name: "flip", options: { padding: 12 } },
-          { name: "preventOverflow", options: { padding: 12 } },
-        ]}
-      >
-        <Box
-          className="notificationsPopoverPaper"
-          role="dialog"
-          aria-labelledby="notifications-title"
-        >
-          <Box className="notificationsPanel">
-            <Box className="notificationsHeader">
-              <Typography id="notifications-title" variant="h6">
-                Notifications
-              </Typography>
-              <IconButton
-                aria-label="Close notifications"
-                onClick={() => toggleDrawer(false)}
-                className="notificationsCloseButton"
-              >
-                <CloseIcon />
-              </IconButton>
-            </Box>
-            {notifications.length === 0 ? (
-              <Box className="notificationsEmptyState">
-                <NotificationsNoneIcon aria-hidden="true" />
-                <Typography variant="subtitle1">
-                  No notifications yet
-                </Typography>
-                <Typography variant="body2">
-                  When someone interacts with you, you&apos;ll see it here.
-                </Typography>
-              </Box>
-            ) : (
-              <Box className="notificationsList" role="list">
-                {notifications.map((notification, index) => {
-                  const author = authors[notification.userId];
-                  const authorName = author?.userName || "Unknown User";
-                  const description = getNotificationDescription(
-                    notification.type,
-                  );
-                  const isFollowRequest = notification.type === "follow";
-
-                  return (
-                    <Box
-                      className="notificationItem"
-                      key={
-                        notification?._id ||
-                        `${notification?.userId}-${index}`
-                      }
-                      role="listitem"
-                    >
-                      <C_Avatar
-                        authorName={authorName}
-                        authorProfilePic={author?.userProfilePic}
-                        LinkTogo={
-                          author?.userName
-                            ? `/mainPage/${author.userName}`
-                            : undefined
-                        }
-                        onClick={() => toggleDrawer(false)}
-                      />
-                      <Box
-                        className="notificationMessage"
-                        onClick={() => {
-                          if (
-                            notification.type === "comment" ||
-                            notification.type === "like"
-                          ) {
-                            setPostId(notification.postId);
-                            toggleDrawer(false);
-                            handleClickOpen();
-                          }
-                        }}
-                      >
-                        <Typography variant="body2">
-                          <strong>{authorName}</strong> {description}
-                        </Typography>
-                        <Typography variant="caption" className="timestamp">
-                          {notification?.createdAt
-                            ? formatRelativeTime(notification.createdAt)
-                            : "Just now"}
-                        </Typography>
-                      </Box>
-                      {isFollowRequest && (
-                        <Box className="notificationActions">
-                          <Button
-                            variant="contained"
-                            onClick={() =>
-                              handleConfirmNotification(notification.userId)
-                            }
-                          >
-                            Confirm
-                          </Button>
-                          <Button
-                            variant="contained"
-                            onClick={() =>
-                              handleDeleteNotification(notification.userId)
-                            }
-                          >
-                            Delete
-                          </Button>
-                        </Box>
-                      )}
-                    </Box>
-                  );
-                })}
-              </Box>
-            )}
-          </Box>
+    <Drawer
+      className="notificationsDrawer"
+      open={open}
+      onClose={() => toggleDrawer(false)}
+      disableScrollLock
+      PaperProps={{ className: "notificationsDrawerPaper" }}
+    >
+      {hasNotifications ? (
+        <>
+          {followNotifications}
+          {commentNotifications}
+          {likeNotifications}
+        </>
+      ) : (
+        <Box className="notificationsEmptyState">
+          <Typography variant="body1">No notifications yet.</Typography>
         </Box>
-      </Popper>
-    </ClickAwayListener>
+      )}
+    </Drawer>
   );
 }

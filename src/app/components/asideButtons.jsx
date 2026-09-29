@@ -20,7 +20,7 @@ export default function Aside() {
   const router = useRouter();
   const [postDialogOpen, setPostDialogOpen] = useState(false);
   const { currentUser } = useContext(AuthGuardContext);
-  const { open, toggleDrawer, hasUnreadNotifications } = useContext(
+  const { toggleDrawer, hasUnreadNotifications } = useContext(
     NotificationsDrawerContext,
   );
   
@@ -53,7 +53,7 @@ export default function Aside() {
             <FavoriteBorderIcon />
           )
         }
-        onClick={(event) => toggleDrawer(!open, event.currentTarget)}
+        onClick={() => toggleDrawer(true)}
       />
       <ExpandButton
         name={"Post"}
