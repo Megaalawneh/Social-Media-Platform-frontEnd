@@ -560,14 +560,39 @@
   }
 
   .commentDialogComposer {
+    display: flex;
     width: 100%;
     flex: 0 0 auto;
   }
 
-  .commentDialogComposer .MuiTextField-root,
-  .commentDialogComposer .MuiInputBase-root {
+  .commentDialogComposer .MuiFormControl-root {
+    flex: 1 1 0;
     width: 100% !important;
     min-width: 0;
+  }
+
+  .commentDialogComposer .MuiInputBase-root {
+    box-sizing: border-box;
+    width: 100% !important;
+    min-width: 0;
+  }
+
+  .commentDialogComposer .MuiInputBase-input {
+    min-width: 0;
+  }
+
+  .commentDialogComposer .MuiInputAdornment-positionEnd {
+    flex-shrink: 0;
+    margin-left: 4px;
+  }
+
+  .commentDialogComposer .MuiInputAdornment-positionEnd .MuiButton-root {
+    display: inline-flex;
+    min-width: 36px;
+    padding: 4px;
+    color: #fff;
+    white-space: nowrap;
+    visibility: visible;
   }
 }
 
