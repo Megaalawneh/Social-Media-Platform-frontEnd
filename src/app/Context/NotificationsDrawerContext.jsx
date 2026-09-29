@@ -7,14 +7,16 @@ export const NotificationsDrawerContext = createContext([]);
 
 export const NotificationsDrawerProvider = ({ children }) => {
   const [open, setOpen] = useState(false);
+  const [anchorEl, setAnchorEl] = useState(null);
   const [hasUnreadNotifications, setHasUnreadNotifications] = useState(false);
 
   const markNewNotification = useCallback(() => {
     setHasUnreadNotifications(true);
   }, []);
 
-  const toggleDrawer = useCallback((newOpen) => {
+  const toggleDrawer = useCallback((newOpen, anchorElement = null) => {
     setOpen(newOpen);
+    setAnchorEl(newOpen ? anchorElement : null);
     if (newOpen) {
       setHasUnreadNotifications(false);
     }
@@ -23,6 +25,7 @@ export const NotificationsDrawerProvider = ({ children }) => {
     <NotificationsDrawerContext.Provider
       value={{
         open,
+        anchorEl,
         toggleDrawer,
         hasUnreadNotifications,
         markNewNotification,

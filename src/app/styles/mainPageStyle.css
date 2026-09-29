@@ -479,11 +479,6 @@
     margin: 12px;
   }
 
-  .MuiDrawer-paper {
-    max-width: 100vw;
-    box-sizing: border-box;
-    overflow-x: hidden;
-  }
 }
 
 @media (max-width: 420px) {
@@ -503,5 +498,128 @@
     width: 42px;
     height: 42px;
     padding: 9px;
+  }
+}
+
+.notificationsPopoverRoot {
+  z-index: 1300;
+}
+
+.notificationsPopoverPaper {
+  position: relative;
+  width: min(420px, calc(100vw - 24px));
+  max-height: min(70vh, 560px);
+  overflow: auto;
+  color: white !important;
+  background: rgb(35, 34, 34) !important;
+  border: 1px solid rgb(68, 66, 66);
+  border-radius: 14px !important;
+  box-shadow: 0 12px 36px rgba(0, 0, 0, 0.38) !important;
+}
+
+.notificationsPanel {
+  width: 100%;
+}
+
+.notificationsHeader {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 14px;
+  background: rgb(35, 34, 34);
+  border-bottom: 1px solid rgb(68, 66, 66);
+}
+
+.notificationsCloseButton {
+  color: white !important;
+}
+
+.notificationsEmptyState {
+  display: flex;
+  min-height: 210px;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 24px;
+  color: rgb(190, 190, 190);
+  text-align: center;
+}
+
+.notificationsEmptyState > .MuiSvgIcon-root {
+  color: #9ca3af;
+  font-size: 42px;
+}
+
+.notificationsEmptyState .MuiTypography-subtitle1 {
+  color: white;
+  font-weight: 600;
+}
+
+.notificationsList {
+  display: flex;
+  flex-direction: column;
+}
+
+.notificationItem {
+  display: grid;
+  grid-template-columns: 40px minmax(0, 1fr);
+  align-items: start;
+  gap: 10px;
+  padding: 12px 14px;
+  border-bottom: 1px solid rgb(68, 66, 66);
+}
+
+.notificationItem:last-child {
+  border-bottom: 0;
+}
+
+.notificationMessage {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.notificationMessage .MuiTypography-body2 {
+  color: white;
+}
+
+.notificationActions {
+  display: flex;
+  grid-column: 2;
+  gap: 8px;
+}
+
+.notificationActions .MuiButton-root {
+  min-width: 72px;
+  min-height: 34px;
+  padding: 4px 10px;
+  font-size: 0.75rem;
+}
+
+.notificationActions .MuiButton-root:last-child {
+  background-color: #25292e;
+}
+
+@media (max-width: 760px) {
+  .notificationsPopoverRoot {
+    position: fixed !important;
+    top: auto !important;
+    right: 12px !important;
+    bottom: calc(72px + env(safe-area-inset-bottom)) !important;
+    left: 12px !important;
+    width: auto !important;
+    max-width: 420px;
+    z-index: 1300;
+    margin: 0 auto;
+    transform: none !important;
+  }
+
+  .notificationsPopoverPaper {
+    position: relative;
+    width: 100%;
+    max-height: min(65dvh, 520px);
   }
 }
