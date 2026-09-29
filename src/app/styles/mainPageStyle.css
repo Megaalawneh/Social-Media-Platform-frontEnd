@@ -501,6 +501,76 @@
   }
 }
 
+@media (max-width: 760px) {
+  .commentDialogRoot .MuiDialog-paper {
+    width: calc(100vw - 16px) !important;
+    max-width: calc(100vw - 16px) !important;
+    height: calc(100dvh - 24px) !important;
+    max-height: calc(100dvh - 24px) !important;
+    margin: 12px !important;
+    overflow: hidden !important;
+  }
+
+  .commentDialogLayout {
+    width: 100% !important;
+    height: 100% !important;
+    max-height: 100% !important;
+    min-height: 0;
+    flex-direction: column !important;
+    overflow: hidden !important;
+  }
+
+  .commentDialogMedia {
+    width: 100% !important;
+    height: auto !important;
+    max-width: 100% !important;
+    max-height: 30dvh !important;
+    flex: 0 1 auto;
+    aspect-ratio: auto !important;
+    object-fit: contain !important;
+  }
+
+  .commentDialogMedia video {
+    max-height: 30dvh;
+    object-fit: contain !important;
+  }
+
+  .commentDialogPanel {
+    width: 100% !important;
+    min-width: 0;
+    min-height: 0;
+    flex: 1 1 auto;
+    box-sizing: border-box;
+    overflow: hidden;
+    padding: 12px !important;
+  }
+
+  .commentDialogPanel > .MuiBox-root:first-child {
+    min-width: 0;
+    flex: 0 0 auto;
+  }
+
+  .commentDialogComments {
+    min-height: 48px;
+    flex: 1 1 auto;
+    margin-bottom: 0 !important;
+    overflow-x: hidden !important;
+    overflow-y: auto !important;
+    overscroll-behavior: contain;
+  }
+
+  .commentDialogComposer {
+    width: 100%;
+    flex: 0 0 auto;
+  }
+
+  .commentDialogComposer .MuiTextField-root,
+  .commentDialogComposer .MuiInputBase-root {
+    width: 100% !important;
+    min-width: 0;
+  }
+}
+
 .notificationsEmptyState {
   display: flex;
   min-height: 96px;

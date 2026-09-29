@@ -93,7 +93,7 @@ function CommentItem({
   const like = comment?.likes?.some((like) => like.userId === currentUser);
   const displayedText = () => {
     if (!isLongText || isExpanded) return comment?.content;
-    return comment?.textComment.slice(0, LIMIT) + "...";
+    return comment?.content.slice(0, LIMIT) + "...";
   };
 
   const handleDeleteComment = (postId, commentId) => {
@@ -379,8 +379,14 @@ export default function CommentDialog() {
 
   return (
     <>
-      <BootstrapDialog open={open} onClose={handleClose} disableScrollLock>
+      <BootstrapDialog
+        className="commentDialogRoot"
+        open={open}
+        onClose={handleClose}
+        disableScrollLock
+      >
         <Box
+          className="commentDialogLayout"
           style={{
             width: "100%",
             maxWidth: "auto",
@@ -396,6 +402,7 @@ export default function CommentDialog() {
         >
           {post?.mediaType === "video" ? (
             <Box
+              className="commentDialogMedia"
               sx={{
                 position: "relative",
                 width: "100%",
@@ -501,6 +508,7 @@ export default function CommentDialog() {
             </Box>
           ) : (
             <CardMedia
+              className="commentDialogMedia"
               component="img"
               height="auto"
               sx={{
@@ -513,6 +521,7 @@ export default function CommentDialog() {
             />
           )}
           <div
+            className="commentDialogPanel"
             style={{
               px: 2,
               pb: 1.5,
@@ -619,6 +628,7 @@ export default function CommentDialog() {
               }}
             />
             <div
+              className="commentDialogComments"
               style={{
                 width: "100%",
                 overflow: "auto",
@@ -708,7 +718,7 @@ export default function CommentDialog() {
                 borderColor: "rgba(255,255,255,0.08)",
               }}
             />
-            <div style={{ display: "flex" }}>
+            <div className="commentDialogComposer" style={{ display: "flex" }}>
               <TextField
                 size="small"
                 value={content}
